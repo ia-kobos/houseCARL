@@ -56,10 +56,10 @@ houseCARL is a single C# process (the MCP server). The pattern:
 ## 4. Repo and directory naming
 
 ### 4.1 Repo name
-`houseCARL` — the project's proper brand name. No technology suffix; no predecessor or dependency brand embedded (the old `Claude_MO2` mistake of baking in both an AI brand and a dependency brand is not repeated).
+`houseCARL` — the project's proper brand name. No technology suffix; no predecessor or dependency brand embedded.
 
 ### 4.2 Top-level directories
-`kebab-case` for all top-level dirs — filesystem artifacts, not code identifiers. Examples: `dev/`, `standards/`, `tools/`, `tests/`, `.claude/`.
+`kebab-case` for all top-level dirs — filesystem artifacts, not code identifiers. Examples: `dev/`, `standards/`, `tools/`, `tests/`, `.agents/`.
 
 ### 4.3 File names (general)
 
@@ -67,7 +67,7 @@ houseCARL is a single C# process (the MCP server). The pattern:
 |---|---|---|
 | C# source | `PascalCase.cs` | `RecordReader.cs` |
 | C# project | `kebab-case.csproj` | `housecarl-mcp.csproj` |
-| Markdown — living docs | `SCREAMING_SNAKE_CASE.md` | `README.md`, `CLAUDE.md` |
+| Markdown — living docs | `SCREAMING_SNAKE_CASE.md` | `README.md`, `AGENTS.md` |
 | Markdown — archive | `kebab-case.md` / dated | `rebuild-plan-v1.md` |
 | Config files | lowercase / tool convention | `.gitignore` |
 | Shell / PS scripts | `kebab-case.ps1` / `.sh` | `build-release.ps1` |
@@ -76,23 +76,23 @@ houseCARL is a single C# process (the MCP server). The pattern:
 
 ## 5. Skill folder naming
 
-**Rule:** `kebab-case` for skill folders — the Claude Code de-facto standard. Skill folder names are filesystem paths, not identifiers, and are purpose-based (never brand-prefixed).
+**Rule:** `kebab-case` for skill folders. Skill folder names are filesystem paths, not identifiers, and are purpose-based (never brand-prefixed).
 
-**Pattern:** `.claude/skills/<lowercase-hyphenated>/SKILL.md`
+**Pattern:** `.agents/skills/<lowercase-hyphenated>/SKILL.md`
 
 | Good | Bad | Reason |
 |------|-----|--------|
-| `crash-diagnostics/` | `crash_diagnostics/` | underscore (inconsistent with CC convention) |
+| `crash-diagnostics/` | `crash_diagnostics/` | underscore (inconsistent with repository convention) |
 | `mod-dissection/` | `ModDissection/` | PascalCase |
 | `esp-patching/` | `esp-patching-skill/` | redundant `-skill` suffix |
 
-**Check:** every dir under `.claude/skills/` matches `^[a-z][a-z0-9-]*$` and contains exactly one `SKILL.md` (hook-enforceable once hooks exist).
+**Check:** every dir under `.agents/skills/` matches `^[a-z][a-z0-9-]*$` and contains exactly one `SKILL.md`.
 
 ---
 
 ## 6. Future-rebrand resilience
 
-The Claude_MO2 → Housecarl → houseCARL transitions showed how painful an embedded brand is. These rules make a future rebrand a one-change job, not an audit.
+Earlier project renames showed how painful an embedded provider brand is. These rules make a future rebrand a one-change job, not an audit.
 
 ### 6.1 Single source of truth
 The product name appears as a string literal in exactly one place: a single constant in the MCP server's config. Everything else references that constant. No bare brand strings scattered across source.
@@ -119,6 +119,6 @@ No version in any directory, file, or identifier — versioning lives in config 
 | C# test projects | `<component>-tests/` | `housecarl-mcp-tests/` |
 | Skill folders | `kebab-case/` | `crash-diagnostics/` |
 | Top-level dirs | `kebab-case/` | `dev/`, `standards/` |
-| Living docs | `SCREAMING_SNAKE_CASE.md` | `CLAUDE.md` |
+| Living docs | `SCREAMING_SNAKE_CASE.md` | `AGENTS.md` |
 | Archive docs | `kebab-case.md` / dated | `rebuild-plan-v1.md` |
 | Brand strings | one constant, never bare literals | server config constant |

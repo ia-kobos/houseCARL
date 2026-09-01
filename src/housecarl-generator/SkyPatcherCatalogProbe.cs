@@ -143,7 +143,7 @@ public static class SkyPatcherCatalogProbe
     static int CrossCheckIndex(SkyPatcherCatalog cat)
     {
         int failures = 0;
-        var path = Path.Combine(".claude", "skills", "skypatcher-authoring", "references", "index.jsonl");
+        var path = Path.Combine(".agents", "skills", "skypatcher-authoring", "references", "index.jsonl");
         if (!File.Exists(path))
             return Check($"reference index.jsonl exists at {path}", false, "wrong CWD? run from the repo root");
 

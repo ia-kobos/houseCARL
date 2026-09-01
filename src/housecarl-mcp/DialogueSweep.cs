@@ -10,7 +10,7 @@ namespace HousecarlMcp;
 /// <para><b>Its own file, because it is its own thing.</b> The per-seed validation is core's
 /// (<see cref="DialogueValidate"/>); what lives here is the family's selection grammar — the seed parse, the
 /// cost-refusal, the seed budget and the tally the accounting subtracts against. Hanging that off
-/// <c>LoadOrderService</c> is what CLAUDE.md §8's don't-append-a-new-domain rule names, and the service keeps only
+/// <c>LoadOrderService</c> is what AGENTS.md §8's don't-append-a-new-domain rule names, and the service keeps only
 /// the thin call.</para>
 ///
 /// <para><b>Seeds, not a sweep</b> (SPEC §6.1 F1.1). This family does not take the other families' plugin scope: a

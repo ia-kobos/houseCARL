@@ -1190,7 +1190,7 @@ internal static class PlaceAssetProbe
                     if (!TryDenyAll(target))
                     {
                         Check(false, $"{cell} — this host would not apply a deny ACL, so {what} is UNPROVEN here. " +
-                                     "Not a pass: a cell that cannot be fixtured honestly is a signal (CLAUDE.md §5 #11), not a gap to skip past.");
+                                     "Not a pass: a cell that cannot be fixtured honestly is a signal (AGENTS.md §5 #11), not a gap to skip past.");
                         continue;
                     }
                     try
@@ -1237,7 +1237,7 @@ internal static class PlaceAssetProbe
 
                 if (!TryDenyList(listDenied))
                     Check(false, "M31 — this host would not apply a list-deny ACL, so the folder-listing probe is UNPROVEN here. " +
-                                 "Not a pass: a cell that cannot be fixtured honestly is a signal (CLAUDE.md §5 #11), not a gap to skip past.");
+                                 "Not a pass: a cell that cannot be fixtured honestly is a signal (AGENTS.md §5 #11), not a gap to skip past.");
                 else
                     try
                     {

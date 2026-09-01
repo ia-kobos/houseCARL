@@ -24,7 +24,7 @@ namespace HousecarlGenerator;
 /// THE MEASUREMENT (per sampled plugin):
 ///   1. EAGER load — SkyrimMod.CreateFromBinary(path) (the SAME call the extend write path uses;
 ///      WritePatchBuilder.cs:247). The SINGLE target plugin only — NEVER the load order (the legacy 12–14 GB
-///      RAM trap; CLAUDE.md §1). Masters are opened LAZILY as overlays.
+///      RAM trap; AGENTS.md §1). Masters are opened LAZILY as overlays.
 ///   2. NO-OP RE-SERIALIZE — write the loaded mod straight back out with the product incantation MINUS the
 ///      FormID floor: .WithLoadOrder(<the plugin's own masters, as overlays>).NoNextFormIDProcessing().Write().
 ///      NoNextFormIDProcessing persists the IN-MEMORY counter verbatim, and we deliberately DO NOT call

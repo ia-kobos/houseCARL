@@ -11,7 +11,7 @@ namespace HousecarlMcp;
 /// <para><b>Why its own file rather than beside the two sweep families' sections.</b> The rule those sections follow
 /// is that a render lives with the helpers it is assembled out of. This family's helpers are
 /// <see cref="DialogueWire"/>'s — the topic block, the SEQ block, the issue rows — not <c>Wire</c>'s, so putting it
-/// in <c>Wire</c> would have split it from everything it calls and grown a file CLAUDE.md §8 already names. What
+/// in <c>Wire</c> would have split it from everything it calls and grown a file AGENTS.md §8 already names. What
 /// crosses a file boundary here is one call per transport, not a dozen widened members.</para>
 ///
 /// <para><b>Class 8 is not rendered here.</b> The effective merged INFO order is an ordered sequence, not a findings
@@ -92,7 +92,7 @@ internal static class DialogueSweepRender
                 // seed subject announced it was finished. Water-filling allocates the seed heads their MEASURED
                 // demand and the topic blocks everything else, before either writes, so there is no share to hand
                 // back and the conditional could not be made to change any response — which is the signal to
-                // delete it (CLAUDE.md §5 #11, PR #339's precedent) rather than leave an arm that cannot fail.
+                // delete it (AGENTS.md §5 #11, PR #339's precedent) rather than leave an arm that cannot fail.
                 // What it bought is now bought by construction: measured on the live order (ARR 2.0, one
                 // 235-topic quest, plain defaults) that fix took 53 topics in 40,296 chars of an 80,000 cap to 82
                 // in 79,186, and DIALOGUE-FINISHED-SEED-HANDS-BACK-ITS-SHARE holds the same property here.

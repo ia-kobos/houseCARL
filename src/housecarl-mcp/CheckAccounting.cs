@@ -45,7 +45,7 @@ namespace HousecarlMcp;
 /// <para><b>Deliberately findings-family-agnostic, and deliberately no further.</b> Its subjects are lane facts —
 /// entries, sections, roster rows — which carry to any findings family without knowing what a family is. It takes
 /// no taxonomy parameter and holds no family enum: the merged <c>check</c> surface (SPEC §6.1) is a separate PR
-/// with its own design, and building its machinery here on speculation is what CLAUDE.md §8 names.</para>
+/// with its own design, and building its machinery here on speculation is what AGENTS.md §8 names.</para>
 /// </summary>
 internal sealed class CheckAccounting
 {

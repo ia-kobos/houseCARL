@@ -9,7 +9,7 @@ namespace HousecarlGenerator;
 /// per-type JSON schema blocks (one compact line each — JSONL) sharded by kind, plus
 /// <c>index.jsonl</c> mapping every type name + xEdit signature to its {file, line}. This is the
 /// SAME catalog <c>corpus.json</c> holds, minus the assembly-qualified type names (the write tool
-/// keeps those; Claude never needs them) — so the skill's read-content and the write tool's rulebook
+/// keeps those; Codex never needs them) — so the skill's read-content and the write tool's rulebook
 /// physically can't disagree about field names or types: one generator walk, two renderings.
 ///
 /// Lookup pattern the skill follows: grep <c>index.jsonl</c> for the name/signature, take {file, line},
@@ -96,7 +96,7 @@ public static class ReferenceEmitter
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         // Emit literal angle-brackets and backticks instead of their \uXXXX escapes — these files are read by
-        // Claude, not embedded in HTML, so the relaxed encoder is both cleaner and a real token saving
+        // Codex, not embedded in HTML, so the relaxed encoder is both cleaner and a real token saving
         // (FormLink<X> / List<X> are everywhere). corpus.json keeps default escaping; it's machine-only.
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };

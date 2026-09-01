@@ -1,10 +1,10 @@
 # HOUSECARL_DOC_HYGIENE — doc hygiene standard (LIVING vs ARCHIVE)
 
-*A houseCARL standard. Revisable when reality contradicts it (CLAUDE.md §5.3) — propose the revisit, Aaron decides.*
+*A houseCARL standard. Revisable when reality contradicts it (AGENTS.md) — propose the revisit, Aaron decides.*
 
-This standard defines the two-class document system houseCARL runs on. It is the fuller statement of the rule CLAUDE.md §8 already gestures at ("don't edit the foundation corpus or other ARCHIVE docs… new docs supersede; old ones stay as written"). Its purpose is to **prevent staleness structurally** rather than catch it in a post-hoc audit: a doc's class tells you, by construction, whether it must track current state or is frozen history.
+This standard defines the two-class document system houseCARL runs on. It is the fuller statement of the archive rule in AGENTS.md. Its purpose is to **prevent staleness structurally** rather than catch it in a post-hoc audit: a doc's class tells you, by construction, whether it must track current state or is frozen history.
 
-It is a **convention, not an enforced gate.** houseCARL deliberately carries no pre-commit hook or mandatory ship-gate for this (guardrails earn their place from real need — CLAUDE.md §5). The `Class:` marker plus session discipline is the mechanism. If drift ever becomes a real, recurring problem, *that* is when an enforcement tool earns its place — propose it then.
+It is a **convention, not an enforced gate.** houseCARL deliberately carries no pre-commit hook or mandatory ship-gate for this (guardrails earn their place from real need — AGENTS.md). The `Class:` marker plus session discipline is the mechanism. If drift ever becomes a real, recurring problem, *that* is when an enforcement tool earns its place — propose it then.
 
 ---
 
@@ -38,14 +38,14 @@ The marker is the load-bearing signal: it tells the next session, at a glance, w
 
 | Path / doc | Class | Notes |
 |---|---|---|
-| `CLAUDE.md` | LIVING | The operating doc — how houseCARL works + how we operate. Stays stable; points at the handoff folder for tactical state (never a session log). |
+| `AGENTS.md` | LIVING | The operating doc — how houseCARL works and how Codex sessions operate. |
 | `standards/HOUSECARL_*.md` | LIVING | Naming, skill-authoring, this doc. Standards evolve; revise when reality contradicts (§5.3). |
 | `README.md`, `CHANGELOG.md` (when they ship) | LIVING | Consumer-facing install/capability overview + version-by-version narrative. Update in the commit that changes what they describe. |
 | `docs/architecture/*` | LIVING | Public per-subsystem notes — what it is, how it's shaped, the contracts that hold it together (§8). |
 | `docs/decisions/*` | ARCHIVE | Public ADRs — numbered, immutable, superseded by a later ADR rather than edited (§8). |
 | `dev/plans/*` | **LIVING → ARCHIVE** | LIVING while actively worked against; becomes ARCHIVE when **superseded or closed** (see §4). The active plan declares `Class: LIVING`; a closed one is frozen. |
 | `dev/session-handoffs/*` | ARCHIVE | Frozen from first commit. The latest is "where we are"; older ones are history. Never edited to reflect later state. |
-| `dev/PRFAQ/*` | ARCHIVE | The immutable foundation corpus — why decisions were made (CLAUDE.md §8). New docs supersede; these never change. |
+| `dev/PRFAQ/*` | ARCHIVE | The immutable foundation corpus — why decisions were made. New docs supersede; these never change. |
 | `dev/review/*`, `dev/references/*` | ARCHIVE | Review snapshots + captured upstream corpora — frozen at capture. |
 
 The persistent **memory** system (`memory/MEMORY.md` + `memory/*.md`) is governed separately — it's the cross-session memory store, not repo documentation, and is pruned/updated by its own rules.
@@ -60,7 +60,7 @@ A plan is LIVING while it drives in-flight work, then crosses to ARCHIVE when th
 2. From the next commit on, it's frozen — the typo-fix exception aside.
 3. If later work needs to revisit the topic, write a *new* LIVING doc (or update the relevant standard / handoff) that supersedes it. Don't reopen the archived one.
 
-This is why "where are we" lives in the **latest handoff** (ARCHIVE, one per session) and "how we operate" lives in **CLAUDE.md + standards** (LIVING): the two never compete to be the current-state authority.
+This is why "where are we" lives in the **latest handoff** (ARCHIVE, one per session) and "how we operate" lives in **AGENTS.md + standards** (LIVING): the two never compete to be the current-state authority.
 
 ---
 
@@ -110,6 +110,6 @@ Adopted 2026-08-19 from the code-quality review (~511 `PR #` citations across `s
 
 Three rules make it hold:
 
-1. **A PR that makes an architectural decision lands its ADR in the same PR** — same discipline as the CHANGELOG rule (CLAUDE.md §5 #10).
+1. **A PR that makes an architectural decision lands its ADR in the same PR** — same discipline as the CHANGELOG rule in AGENTS.md.
 2. **§6 governs the migration: `docs/` replaces the comment, never copies it.** The paragraph is deleted where the note is written; the code keeps at most a one-line pointer. A fact stated in both places is the stale-sentence factory §6 exists to close.
 3. **Prospective immediately; retroactive opportunistically.** New code is written to this rule now. Existing essay comments are cleaned when a file is touched — never as a bulk scrub, and never in deletion-flagged 1.x code (rewriting comments in condemned code is wasted work by the demolition rule).

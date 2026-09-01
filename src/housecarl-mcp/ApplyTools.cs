@@ -21,7 +21,7 @@ namespace HousecarlMcp;
 /// <item><b>The §4.5 zip</b> — <c>bundle=</c> (field paths, uniform across pairs) × <c>assignments=</c>
 /// ([{target, from, from_source}]) is a cross-RECORD field-bundle copy, the generic core under
 /// "give this record that record's Keywords/stats/appearance frame". Which paths form a bundle is skill-carried
-/// data; the tool stays generic (CLAUDE.md §3, second cornerstone).</item>
+/// data; the tool stays generic (AGENTS.md §3, second cornerstone).</item>
 /// <item><b>One list spelling</b> — <c>ops=</c> takes the inline array OR <c>"@&lt;absolute path&gt;"</c>
 /// (SPEC §5.1's @file convention), retiring <c>from_file=</c> and its inline-vs-file mutual exclusion. Both lanes
 /// now parse through the SAME strict reader, so an unknown member is refused BY NAME inline too — the SDK binder

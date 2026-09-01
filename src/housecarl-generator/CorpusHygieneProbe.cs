@@ -9,7 +9,7 @@ namespace HousecarlGenerator;
 /// REGRESSION GUARD (standing CI instrument) — CORPUS STRUCTURAL HYGIENE.
 ///
 /// The corpus DISPLAY (generated/corpus.json + the shipped mutagen-reference jsonl shards, both from ONE
-/// CorpusGenerator walk) is a by-construction, load-bearing artifact: it is what Claude reads to author
+/// CorpusGenerator walk) is a by-construction, load-bearing artifact: it is what Codex reads to author
 /// every write, and what the write GATE (CorpusRulebook) consumes. A recurring class of defect is the
 /// reflection walk emitting something into DISPLAY that is NOT actually authorable — a base listed as its
 /// own arm, a C# indexer surfaced as a field, an infrastructure (System.*) type cataloged as a modeled

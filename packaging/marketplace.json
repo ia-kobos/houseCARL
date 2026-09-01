@@ -1,13 +1,20 @@
 {
-  "name": "housecarl-local",
-  "owner": {
-    "name": "Avick3110"
+  "name": "housecarl",
+  "interface": {
+    "displayName": "houseCARL"
   },
   "plugins": [
     {
       "name": "housecarl",
-      "source": "./housecarl",
-      "description": "houseCARL - data-layer access to your Skyrim SE load order, in plain English."
+      "source": {
+        "source": "local",
+        "path": "./housecarl"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
     }
   ]
 }

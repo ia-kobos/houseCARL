@@ -13,28 +13,25 @@ namespace HousecarlGenerator;
 /// silently-wrong outcome in a SHIPPED artifact, and it is exactly what bit `dialogue-authoring` at the 1.3
 /// pre-release gate: a single colon-space inside the unquoted description ("...the records themselves:
 /// distributing...") made YAML read a nested mapping, threw, and dropped name+description. It passed PR review
-/// and CI green because CI never validated the plugin PACKAGE — only `claude plugin validate --strict` (a
-/// manual, rig-time step) caught it. This guard turns that manual catch into a by-construction CI gate, so this
-/// class is caught at PR time, not at release (the manual --strict stays as belt-and-suspenders — see INV1).
+/// and CI green because CI did not validate the plugin package. This guard turns that manual catch into a
+/// by-construction CI gate, so this class is caught at PR time, not at release.
 ///
 /// Self-contained, in the corpus-hygiene-guard pattern: it reads the REAL shipped artifacts from the repo
-/// (every .claude/skills/*/SKILL.md, the Codex umbrella plugin/codex/housecarl/SKILL.md, and the manifest
-/// plugin/.claude-plugin/plugin.json — CWD is the repo root, as the generator's corpus default already assumes)
+/// (every .agents/skills/*/SKILL.md and plugin/.codex-plugin/plugin.json — CWD is the repo root)
 /// and asserts each invariant GREEN over them, paired with a RED
 /// arm that feeds the SAME checker a synthetic violation and asserts it FIRES — so a GREEN can never mean "no
 /// skill happened to be broken", only "the checker has teeth and every real skill passes it".
 ///
-///   INV1 — EVERY SHIPPED SKILL FRONTMATTER PARSES + CARRIES name/description, across BOTH shipped trees (the
-///          Claude Code skills under .claude/skills AND the Codex umbrella plugin/codex/housecarl). The leading
+///   INV1 — EVERY SHIPPED SKILL FRONTMATTER PARSES + CARRIES name/description. The leading
 ///          --- ... --- fenced block parses as a YAML mapping with a non-empty `name` and `description`. The parse
 ///          uses a real YAML parser (YamlDotNet) — a FAITHFUL PROXY for, not byte-identical to, the harness's own
 ///          (JS) YAML parser: it reliably catches the colon-space class (RED-proven below), but the residual risk
-///          is a false-NEGATIVE (YamlDotNet accepts what the real loader would drop), which is why the manual
-///          --strict stays the belt-and-suspenders. (RED: the literal colon-space description that dropped
-///          dialogue-authoring; a frontmatter missing `description`; a file with no fence at all.)
-///   INV2 — THE PLUGIN MANIFEST PARSES + CARRIES name/version. plugin.json is valid JSON with a non-empty
-///          string name + version (the single source of truth the build stamps). (RED: a manifest missing
-///          version.)
+///          is a false-negative (YamlDotNet accepts what the real loader would drop). (RED: the literal
+///          colon-space description that dropped dialogue-authoring; a missing description; no fence.)
+///   INV2 — THE CODEX PLUGIN MANIFEST PARSES + CARRIES name/version/skills/mcpServers. (RED: a manifest
+///          missing version.)
+///   INV3 — CLAUDE-SPECIFIC ACTIVE SURFACES ARE ABSENT. Historical changelog/eval evidence and upstream
+///          files named CLAUDE.md remain valid evidence; active packaging and instructions do not depend on them.
 ///
 /// Run: dotnet run --project src/housecarl-generator -- plugin-validate-guard
 /// </summary>
@@ -49,12 +46,7 @@ public static class PluginValidateProbe
         try
         {
             // ---------- INV1 — every shipped skill's frontmatter parses + has name/description ----------
-            // BOTH shipped frontmatter trees are in scope: the Claude Code skills (.claude/skills, bundled by
-            // build-plugin.ps1) AND the Codex umbrella skill (plugin/codex/housecarl, shipped separately by the
-            // same build). Both carry a YAML frontmatter the respective loader parses, so both are exposed to the
-            // parse-failure class — walking only .claude/skills would leave the Codex skill's same-shape
-            // description unguarded (PR #95 review).
-            var skillRoots = new[] { Path.Combine(".claude", "skills"), "plugin" };
+            var skillRoots = new[] { Path.Combine(".agents", "skills") };
             foreach (var root in skillRoots)
                 Check($"INV1-GREEN skill root '{root}' resolves (run from repo root)", Directory.Exists(root),
                     new() { $"'{Path.GetFullPath(root)}' not found — CWD must be the repo root" });
@@ -64,7 +56,7 @@ public static class PluginValidateProbe
                 .Distinct().OrderBy(p => p, StringComparer.Ordinal).ToList();
             // loud-fail on zero: a wrong CWD must never read as "all skills valid" (Q3)
             Check($"INV1-GREEN found shipped skill frontmatters to validate ({skillFiles.Count})", skillFiles.Count > 0,
-                new() { "no SKILL.md under .claude/skills or plugin/ — wrong CWD or empty tree" });
+                new() { "no SKILL.md under .agents/skills — wrong CWD or empty tree" });
             foreach (var f in skillFiles)
             {
                 var v = ValidateSkillFrontmatter(File.ReadAllText(f));
@@ -83,13 +75,42 @@ public static class PluginValidateProbe
                 s => s.Contains("frontmatter", StringComparison.OrdinalIgnoreCase));
 
             // ---------- INV2 — the plugin manifest parses + has name/version ----------
-            var manifestPath = Path.Combine("plugin", ".claude-plugin", "plugin.json");
+            var manifestPath = Path.Combine("plugin", ".codex-plugin", "plugin.json");
             var mv = ValidateManifest(File.Exists(manifestPath) ? File.ReadAllText(manifestPath) : null, manifestPath);
-            Check("INV2-GREEN plugin manifest parses + has name/version", mv.Count == 0, mv);
+            Check("INV2-GREEN Codex plugin manifest parses + has required paths", mv.Count == 0, mv);
 
             var redManifest = ValidateManifest("{ \"name\": \"x\" }", "synthetic");
             Check("INV2-RED  a manifest missing 'version' is caught",
                 redManifest.Any(s => s.Contains("version", StringComparison.OrdinalIgnoreCase)), redManifest, redArm: true);
+
+            // ---------- INV3 — active repository/package surface is Codex-only ----------
+            var forbiddenPaths = new[]
+            {
+                "CLAUDE.md",
+                ".claude",
+                Path.Combine("plugin", ".claude-plugin"),
+                Path.Combine("plugin", "codex"),
+            };
+            var present = forbiddenPaths.Where(p => File.Exists(p) || Directory.Exists(p))
+                .Select(p => $"Claude-specific path remains: {p}").ToList();
+            Check("INV3-GREEN Claude-specific active paths are absent", present.Count == 0, present);
+
+            var activeFiles = new[]
+            {
+                "AGENTS.md", "README.md", Path.Combine("packaging", "START-HERE.txt"),
+                Path.Combine("plugin", "README.md"), Path.Combine("plugin", ".mcp.json"),
+                Path.Combine("scripts", "build-plugin.ps1"),
+                Path.Combine("src", "housecarl-setup", "Program.cs"),
+                Path.Combine("src", "housecarl-setup", "housecarl-setup.csproj"),
+            };
+            var residues = activeFiles.Where(File.Exists)
+                .SelectMany(path => File.ReadLines(path).Select((line, index) => (path, line, index)))
+                .Where(x => x.line.Contains("Claude Code", StringComparison.OrdinalIgnoreCase)
+                         || x.line.Contains("CLAUDE_PLUGIN", StringComparison.OrdinalIgnoreCase)
+                         || x.line.Contains(".claude-plugin", StringComparison.OrdinalIgnoreCase))
+                .Select(x => $"{x.path}:{x.index + 1}: {x.line.Trim()}").ToList();
+            Check("INV3-GREEN active instructions and packaging contain no Claude client surface",
+                residues.Count == 0, residues);
         }
         catch (Exception ex)
         {
@@ -158,7 +179,7 @@ public static class PluginValidateProbe
         try { doc = JsonDocument.Parse(json); }
         catch (Exception ex) { v.Add($"manifest is not valid JSON ({FirstLine(ex.Message)})"); return v; }
         using (doc)
-            foreach (var key in new[] { "name", "version" })
+            foreach (var key in new[] { "name", "version", "skills", "mcpServers" })
                 if (!doc.RootElement.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(el.GetString()))
                     v.Add($"manifest missing a non-empty string '{key}'");
         return v;
@@ -182,7 +203,7 @@ public static class PluginValidateProbe
     static string FirstLine(string s) => s.Replace("\r", "").Split('\n')[0];
 
     /// <summary>A repo-root-relative, forward-slashed label for a SKILL.md's directory — so
-    /// '.claude/skills/dialogue-authoring' and 'plugin/codex/housecarl' are both unambiguous in the CI log.</summary>
+    /// '.agents/skills/dialogue-authoring' is unambiguous in the CI log.</summary>
     static string RelLabel(string file)
     {
         var dir = Path.GetDirectoryName(Path.GetFullPath(file))!;

@@ -4,7 +4,7 @@
     houseCARL MCP server (rebuild step 8 / MCP-server step §8.4). The PRODUCT: a localhost HTTP MCP
     server (fork §6-A) that runs STANDALONE — it reads the TRUE active order statically from the MO2
     instance's profile files (§8.5; no USVFS, no live MO2 state, MO2 need not be running). It binds
-    127.0.0.1 and Claude Code connects as a custom connector. Tools ride the PROVEN cores in
+    127.0.0.1 for the optional HTTP mode. Codex normally launches the stdio transport. Tools ride the proven cores in
     housecarl-core — reads on ReadEngine + LoadOrderResolver, writes on WriteEngine.ApplyVerb — so the
     byte-/round-trip proofs transfer by construction. Web SDK supplies WebApplication;
     ModelContextProtocol.AspNetCore supplies WithHttpTransport()/MapMcp().

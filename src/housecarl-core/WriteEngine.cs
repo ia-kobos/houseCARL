@@ -999,7 +999,7 @@ public static class WriteEngine
     //  the patch, this ALLOCATES a brand-new one. Both resolve their group from
     //  the SAME EnumerateFlatGroups enumeration, so the create surface IS the
     //  flat-group surface BY CONSTRUCTION — every concrete flat record type is
-    //  createable, nothing else is silently treated as covered (CLAUDE.md §3).
+    //  createable, nothing else is silently treated as covered (AGENTS.md §3).
     //
     //  A small minority of flat groups are typed by an ABSTRACT base — exactly two
     //  by construction (SkyrimGroup<Global>, SkyrimGroup<GameSetting>); a Global is

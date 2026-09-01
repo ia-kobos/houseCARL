@@ -27,7 +27,7 @@ namespace HousecarlCore;
 /// the accumulating state, so it survives a server restart / a session boundary with NO server-held state (the locked
 /// <c>Stateless</c> transport stays clean). (Option 2, a server-held accumulating session patch, is a deferred 1.x item.)
 ///
-/// ORIGINALS UNTOUCHED is structural (CLAUDE.md §1): this only ever WRITES <paramref name="outPath"/> (sandboxed to the
+/// ORIGINALS UNTOUCHED is structural (AGENTS.md §1): this only ever WRITES <paramref name="outPath"/> (sandboxed to the
 /// server's OutputDir by the caller); every original is opened read-only as a lazy overlay by the resolver and never
 /// written. Cross-master is CLOSED — a patch referencing forms across several plugins serializes with a lean
 /// only-referenced master header (proven + xEdit-confirmed 2026-06-01).
@@ -670,7 +670,7 @@ public static class WritePatchBuilder
     /// to decide what to fetch, and <see cref="TryOffOrderCopyBody"/> uses it to decide what to consume.
     /// <para>Shared rather than restated (PR #318 review [low]): the whole point of the engine-side re-check is that
     /// the two captures agree, and enforcing that agreement with two independent copies of the predicate — in two
-    /// projects, kept in step by a comment asking the reader to check — is the hand-wiring shape CLAUDE.md §3 argues
+    /// projects, kept in step by a comment asking the reader to check — is the hand-wiring shape AGENTS.md §3 argues
     /// against. It matters concretely: the next fix named for this lane is the <c>ActiveNameForPath</c> rule
     /// <c>forward</c> already has, and a clause added to one copy would silently stop matching the other. One
     /// predicate, so a clause can only be added to both.</para>
@@ -886,7 +886,7 @@ public static class WritePatchBuilder
                 + string.Join("\n  - ", problems));
 
         // --- Phase 2: open the TARGET mutably. EAGER, the SINGLE plugin only — NEVER the load order (the legacy 12–14 GB
-        //     RAM trap; CLAUDE.md §1). CreateFromBinary is the same call Apply's extend path uses; an unparseable plugin
+        //     RAM trap; AGENTS.md §1). CreateFromBinary is the same call Apply's extend path uses; an unparseable plugin
         //     throws here and is REFUSED, never silently re-emitted minus the record Mutagen couldn't read (Q3). ---
         if (!File.Exists(targetPath))
             return PatchOutcome.Fail($"in-place target '{fileName}' not found on disk at {targetPath} — the file is untouched.");

@@ -133,7 +133,7 @@ Lists rename and re-wrap generators' output. The three "folder-named" tools emit
 list may fold Reqtificator results into custom-named per-mod patches or name its NPC-Chooser output anything.
 The **principle** is fixed — a plugin that carries a generator's derived data is a tool output for that data,
 however it's named — but the specific names are a property of the modlist, not of this skill. Learn them from
-the modlist's own `CLAUDE.md` / project memory, where modlist facts belong, rather than hardcoding them here.
+the modlist's own `AGENTS.md` / project memory, where modlist facts belong, rather than hardcoding them here.
 When a plugin looks like it carries generated data but you can't confirm it against the signals above, say so
 and ask — don't silently treat it as (or as not) a tool output.
 

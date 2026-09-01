@@ -23,6 +23,6 @@ private working corpus. That somewhere is here.
 ## Reading order for a newcomer
 
 1. The repo [README](../README.md) — what houseCARL is and how to use it.
-2. [CLAUDE.md](../CLAUDE.md) — how the project operates.
+2. [AGENTS.md](../AGENTS.md) — how the project operates.
 3. `decisions/` in order — why the architecture is the way it is.
 4. The `architecture/` note for whatever subsystem you're entering.

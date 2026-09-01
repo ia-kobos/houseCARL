@@ -14,7 +14,7 @@ namespace HousecarlGenerator;
 /// <c>return comparisonForm</c>), and a whole json-capable read tool that was never in the file set. Reviewer 3
 /// then proved by mutation that reverting ALL fourteen <c>ReadTools</c> call sites to prose left the entire
 /// 131-probe suite green. So the grammar had neither completeness by construction nor a guard that noticed its
-/// absence — CLAUDE.md §3's hand-wired-coverage failure mode, restated on the response layer.</para>
+/// absence — AGENTS.md §3's hand-wired-coverage failure mode, restated on the response layer.</para>
 ///
 /// <para><b>Two binding properties, both load-bearing.</b></para>
 /// <list type="number">

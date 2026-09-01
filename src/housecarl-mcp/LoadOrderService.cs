@@ -2284,7 +2284,7 @@ public sealed class LoadOrderService : IDisposable
     /// <summary>The merged <c>check</c> surface's DIALOGUE family: <see cref="ValidateDialogue"/> over a seed list,
     /// tallied for one section of a merged response (SPEC §6.1, classes 1-7). A thin call: the family's own
     /// grammar — the seed parse, the cost-refusal, the seed budget and the tally — lives in
-    /// <see cref="DialogueSweep"/>, because a new family's logic landing here is what CLAUDE.md §8's
+    /// <see cref="DialogueSweep"/>, because a new family's logic landing here is what AGENTS.md §8's
     /// don't-append-a-new-domain rule names.</summary>
     public DialogueCheckResult CheckDialogue(IReadOnlyList<string>? seeds, int limit, bool countsOnly = false)
         => DialogueSweep.Run(ValidateDialogue, seeds, limit, countsOnly);
@@ -5947,7 +5947,7 @@ public sealed class LoadOrderService : IDisposable
             var resolver = Resolver;                                      // builds/refreshes the index (Overlays for the source fetch + serialize)
 
             // W3 PR 2b: a source= the ACTIVE ORDER doesn't contain is located on disk and pre-fetched here — the
-            // capability CLAUDE.md §1 names (read a DISABLED mod's records), on BOTH lanes, because LANE is uniform:
+            // capability AGENTS.md §1 names (read a DISABLED mod's records), on BOTH lanes, because LANE is uniform:
             // the in-place TARGET must stay active (that lane's own contract), but the SOURCE has no such need. A no-op
             // for an active source: null off, null error, no overlay. The overlay must outlive the serialize (the
             // bodies are deep-copied during the write), so it is disposed in the finally below.
@@ -7590,7 +7590,7 @@ public sealed class LoadOrderService : IDisposable
     /// plugin is a first-class mod the user enables / orders / removes independently. A NEW patch always creates a fresh,
     /// marker-stamped folder (name auto-suffixed _001… so a prior reviewed patch is never clobbered);
     /// <paramref name="into"/> EXTENDS an existing houseCARL-owned patch (replace / modify its own plugins).
-    /// ORIGINALS UNTOUCHED is structural (CLAUDE.md §1): houseCARL only ever writes a folder that is brand-NEW or carries
+    /// ORIGINALS UNTOUCHED is structural (AGENTS.md §1): houseCARL only ever writes a folder that is brand-NEW or carries
     /// its own <c>meta.ini</c> marker — it REFUSES (Q3) to write a folder it didn't create (a user mod), even on a name
     /// collision. The caller name is reduced to a bare stem (no directory parts) so it can never escape ModsDir.
     /// Runs under <see cref="_gate"/> like its sibling <see cref="ResolvePatchModFolder"/> (hunt F2): the UniqueStem

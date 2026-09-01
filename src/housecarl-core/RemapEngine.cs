@@ -33,7 +33,7 @@ namespace HousecarlCore;
 ///     family, INFO under a topic, navmesh, landscape) have no flat group and are REFUSED LOUD here — the nested
 ///     duplicate-into placement is the next wave's work, not silently skipped.
 ///
-/// At-rest discipline (Option B / CLAUDE.md §1): every method opens at most ONE plugin mutable at a time
+/// At-rest discipline (Option B / AGENTS.md §1): every method opens at most ONE plugin mutable at a time
 /// (<c>CreateFromBinary</c>, the anti-trap single-plugin lane) and disposes master overlays after the write — the
 /// load order is never held parsed.
 /// </summary>

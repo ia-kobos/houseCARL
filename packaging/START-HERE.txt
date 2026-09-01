@@ -2,75 +2,58 @@
  houseCARL  v{{VERSION}}  --  START HERE
 ========================================================================
 
-houseCARL gives Claude direct, plain-English access to your Skyrim SE
-load order: read any record, author patches, build SkyPatcher / SPID
-files, and look up record schemas and Papyrus signatures. Your original
-plugins are NEVER touched -- every change goes into a new Mod Organizer 2
-mod that you review and enable yourself.
+houseCARL gives Codex direct, plain-English access to your Skyrim SE load
+order: read records, inspect conflicts, author reviewable patches, work with
+assets and scripts, and use the bundled specialist skills.
 
 
-INSTALL  (about 30 seconds, no command line)
+INSTALL  (recommended for modders)
 ------------------------------------------------------------------------
 
-  1.  Double-click   houseCARL-Setup.exe   in this folder.
-      Let it finish. It adds houseCARL to Claude (the skills + the
-      local server) -- it does not touch your game or your mods.
+  1. Double-click houseCARL-Setup.exe in this folder.
 
-  2.  FULLY restart Claude.
-      Close and reopen the Claude desktop app, or restart the `claude`
-      terminal. This is the step people forget -- Claude only picks up
-      houseCARL after a restart.
+  2. Fully restart Codex. Close every Codex window and terminal session,
+     then reopen it so the MCP server and skills reload.
 
-  3.  Point houseCARL at your modlist. In Claude, say (with YOUR path):
+  3. Tell houseCARL which MO2 instance to use, with YOUR path:
 
-          set my houseCARL MO2 instance to  D:\Modding\MO2
+         set my houseCARL MO2 instance to D:\Modding\MO2
 
-      Use the folder that contains your  ModOrganizer.ini.
-      (Or just ask houseCARL to do something, and it will walk you
-      through choosing the folder.)
+     Use the folder containing ModOrganizer.ini.
 
-  4.  Try it:
+  4. Try it:
 
-          "what does my Skyrim load order look like?"
-          "make a patch that gives every iron weapon +5 damage"
-          "which plugins override the IronSword record, and who wins?"
+         "what does my Skyrim load order look like?"
+         "which plugins override IronSword, and who wins?"
 
 
-UPDATING  (installing a newer houseCARL over an older one)
+CODEX PLUGIN INSTALL  (alternative)
 ------------------------------------------------------------------------
-  Same as installing -- but FULLY QUIT Claude (and Codex) FIRST. The
-  setup can't replace the houseCARL server while a session is running
-  it; if one is, it stops and tells you to quit and re-run.
+
+  From this folder:
+
+      codex plugin marketplace add .
+      codex plugin add housecarl@housecarl
+
+  Restart Codex afterward. Use either this method or houseCARL-Setup.exe;
+  installing both creates duplicate registrations.
+
+
+UPDATING
+------------------------------------------------------------------------
+
+  Fully quit Codex before re-running setup or updating the plugin. A running
+  session holds the server executable open; setup detects that and refuses
+  before copying anything.
 
 
 REQUIREMENTS
 ------------------------------------------------------------------------
-  - Windows (x64).
-  - .NET 9 -- BOTH of these runtimes, from the same download page:
-        1)  .NET Runtime 9.0
-        2)  ASP.NET Core Runtime 9.0
-    They are two separate installers, and the ASP.NET Core one does
-    NOT include the base .NET Runtime -- install both. (The runtimes,
-    not the SDK.)
+
+  - Windows x64.
+  - .NET Runtime 9.0 AND ASP.NET Core Runtime 9.0:
         https://dotnet.microsoft.com/download/dotnet/9.0
-        or:  winget install Microsoft.DotNet.Runtime.9
-             winget install Microsoft.DotNet.AspNetCore.9
-    houseCARL-Setup.exe checks for both and tells you which one is
-    missing, so when in doubt just run it.
-  - A recent Claude Code  (v2.1.143 or newer) -- the terminal CLI, or
-    the Claude desktop app (Claude Code is built in; houseCARL runs in
-    Claude Code sessions, not the plain chat).
-  - Mod Organizer 2 with a modlist.  MO2 does NOT need to be running.
-
-
-WHAT'S IN HERE
-------------------------------------------------------------------------
-  houseCARL-Setup.exe   the installer you double-click
-  housecarl\            the plugin itself (server + skills + rulebook)
-  housecarl\README.md   full README, more usage examples, and credits
-  housecarl\LICENSE     GPL-3.0-only  (+ THIRD-PARTY-NOTICES.txt)
-
-Prefer the terminal? The "housecarl" folder is also a normal Claude Code
-plugin -- see housecarl\README.md. Otherwise just use the installer above.
+  - OpenAI Codex with plugin support.
+  - Mod Organizer 2 with a modlist. MO2 does not need to be running.
 
 ========================================================================

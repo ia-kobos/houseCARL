@@ -7,14 +7,14 @@ namespace HousecarlGenerator;
 /// <summary>
 /// REGRESSION GUARD (standing CI instrument, self-contained) — CODEX UMBRELLA COVERAGE.
 ///
-/// The Codex packaging ships ONE umbrella routing skill (plugin/codex/housecarl/SKILL.md) that hand-lists
-/// houseCARL's MCP tools and helper skills. Unlike the 13 Claude Code skills — each its own trigger — the
-/// umbrella is Codex's single hand-maintained router, so nothing forced it to track the tool/skill surface: it
+/// The Codex packaging ships one umbrella routing skill (.agents/skills/housecarl/SKILL.md) that hand-lists
+/// houseCARL's MCP tools and helper skills. The umbrella is hand-maintained, so nothing otherwise forces it
+/// to track the tool/skill surface: it
 /// silently drifted from full coverage to 9 of ~45 tools over ~2 months because adding a tool never touched it.
 ///
 /// This guard makes that drift impossible by construction. It reflects the REAL [McpServerTool] names off the
 /// housecarl-mcp assembly — the authoritative registered set, not a source-text pattern a brittle grep can miss —
-/// and reads the REAL .claude/skills/* folders, then asserts EVERY one is referenced in the umbrella — or allow-listed as
+/// and reads the real .agents/skills/* folders, then asserts every helper is referenced in the umbrella — or allow-listed as
 /// a deliberate omission. A session that adds housecarl_foo or a new skill and forgets the Codex router now gets
 /// a RED CI arm naming exactly what to add. Same "green only if the checker has teeth" shape as the other guards:
 /// RED arms feed a synthetic omission and assert it fires; the allow-list is proven to actually suppress.
@@ -36,7 +36,7 @@ public static class CodexUmbrellaCoverageProbe
         // (none)
     };
 
-    static readonly string UmbrellaPath = Path.Combine("plugin", "codex", "housecarl", "SKILL.md");
+    static readonly string UmbrellaPath = Path.Combine(".agents", "skills", "housecarl", "SKILL.md");
 
     public static int RunGuard(string[] args)
     {
@@ -54,10 +54,10 @@ public static class CodexUmbrellaCoverageProbe
             Check($"GREEN reflected a non-empty MCP tool set ({tools.Count})", tools.Count > 0,
                 new() { "no [McpServerTool] names reflected off the housecarl-mcp assembly — wrong assembly, or the attribute type moved" });
 
-            // Authoritative skill set — the real .claude/skills/* folders.
+            // Authoritative helper-skill set — the real .agents/skills/* folders except this router.
             var skills = SkillSlugs();
             Check($"GREEN found bundled skill folders ({skills.Count})", skills.Count > 0,
-                new() { "no folders under .claude/skills — wrong CWD or empty tree" });
+                new() { "no helper folders under .agents/skills — wrong CWD or empty tree" });
 
             // The coverage check matches on an IDENTIFIER BOUNDARY, not a bare substring. It has to: the 2.0
             // surface renames tools onto prefixes of the 1.x names they absorb (housecarl_create ⊂
@@ -151,9 +151,10 @@ public static class CodexUmbrellaCoverageProbe
 
     static List<string> SkillSlugs()
     {
-        var dir = Path.Combine(".claude", "skills");
+        var dir = Path.Combine(".agents", "skills");
         return Directory.Exists(dir)
-            ? Directory.GetDirectories(dir).Select(d => Path.GetFileName(d)!).Where(s => !string.IsNullOrEmpty(s))
+            ? Directory.GetDirectories(dir).Select(d => Path.GetFileName(d)!)
+                       .Where(s => !string.IsNullOrEmpty(s) && s != "housecarl")
                        .OrderBy(s => s, StringComparer.Ordinal).ToList()
             : new();
     }

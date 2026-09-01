@@ -1,6 +1,6 @@
 #requires -Version 5.1
 <#
-  build-plugin.ps1 - assemble the houseCARL plugin AND pack the shippable release zip.
+  build-plugin.ps1 - assemble the houseCARL Codex plugin and pack the shippable release zip.
 
   The hand-authored plugin SOURCE lives in plugin/ (tracked); package-root extras (the
   START-HERE note + the local marketplace.json) live in packaging/ (tracked). This script
@@ -9,17 +9,16 @@
   risk), assembles the full shippable tree into dist/, and packs it into release/houseCARL-<ver>.zip.
 
   Outputs (all gitignored build artifacts, reproducible on demand):
-      dist/housecarl/                         the plugin tree (what `claude plugin validate` checks)
+      dist/housecarl/                         the Codex plugin tree
       dist/houseCARL-Setup.exe                the no-CLI desktop installer
       dist/START-HERE.txt                     friend-facing note (version stamped from plugin.json)
-      dist/.claude-plugin/marketplace.json    CLI-install descriptor (local marketplace)
+      dist/.agents/plugins/marketplace.json   Codex local-marketplace descriptor
       release/houseCARL-<ver>.zip             the single shippable zip (dist/ under a houseCARL/ root)
 
-  The version is read from plugin/.claude-plugin/plugin.json (single source of truth) and stamped
+  The version is read from plugin/.codex-plugin/plugin.json (single source of truth) and stamped
   into START-HERE.txt and the zip name.
 
-  After it succeeds, run the validation gate (necessary, not sufficient):
-      claude plugin validate ./dist/housecarl --strict
+  The repository's plugin-validate-guard is the packaging validation gate and runs in CI.
 
   Reference:
       dev/plans/PLUGIN_BUILD_EXECUTION_2026-06-03.md   (the checklist this implements)
@@ -33,22 +32,22 @@ $ErrorActionPreference = 'Stop'
 # ---- paths -----------------------------------------------------------------
 $RepoRoot     = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $PkgRoot      = Join-Path $RepoRoot 'dist'              # package root: ships housecarl/ + houseCARL-Setup.exe + extras
-$DistRoot     = Join-Path $PkgRoot 'housecarl'          # the plugin tree (what `claude plugin validate` checks)
+$DistRoot     = Join-Path $PkgRoot 'housecarl'          # Codex plugin tree
 $ServerDir    = Join-Path $DistRoot 'server'
 $SkillsDir    = Join-Path $DistRoot 'skills'
 $PluginSrc    = Join-Path $RepoRoot 'plugin'
 $GeneratedDir = Join-Path $RepoRoot 'generated'
 $CorpusSrc    = Join-Path $GeneratedDir 'corpus.json'
-$RefDir       = Join-Path $RepoRoot '.claude\skills\mutagen-reference\references'
+$RefDir       = Join-Path $RepoRoot '.agents\skills\mutagen-reference\references'
 $GenProj      = Join-Path $RepoRoot 'src\housecarl-generator'
 $McpProj      = Join-Path $RepoRoot 'src\housecarl-mcp'
 $SetupProj    = Join-Path $RepoRoot 'src\housecarl-setup'
 $PackagingSrc = Join-Path $RepoRoot 'packaging'        # tracked source for package-root extras
 $ReleaseDir   = Join-Path $RepoRoot 'release'          # output dir for the shippable zip (gitignored)
-$PluginManifest = Join-Path $PluginSrc '.claude-plugin\plugin.json'   # single source of truth for the version
+$PluginManifest = Join-Path $PluginSrc '.codex-plugin\plugin.json'   # single source of truth for the version
 
-# the 14 shipped skills (the modlist-authoring cluster was removed; tool-surface skills wait)
-$Skills = @('mutagen-reference','papyrus-reference','skypatcher-authoring','spid-authoring','kid-authoring','papyrus-optimization','facegen-diagnostics','dialogue-authoring','oar-authoring','tool-output-awareness','biped-slot-reference','skse-plugin-authoring','bulk-record-jobs','npc-appearance-copy')
+# the umbrella router plus the 14 shipped helper skills
+$Skills = @('housecarl','mutagen-reference','papyrus-reference','skypatcher-authoring','spid-authoring','kid-authoring','papyrus-optimization','facegen-diagnostics','dialogue-authoring','oar-authoring','tool-output-awareness','biped-slot-reference','skse-plugin-authoring','bulk-record-jobs','npc-appearance-copy')
 
 function Step($n,$msg) { Write-Host "`n=== [$n] $msg ===" -ForegroundColor Cyan }
 
@@ -59,9 +58,8 @@ if (-not $Version) { throw "could not read 'version' from $PluginManifest" }
 Write-Host ("Building houseCARL v{0}" -f $Version) -ForegroundColor Green
 
 # ---- 0. clean --------------------------------------------------------------
-# Clean the WHOLE package root, not just dist/housecarl: stale package-root extras (codex/,
-# START-HERE.txt, a previous setup exe) would otherwise survive into the zip - a stale nested
-# codex/codex/ subtree did exactly that at the 1.2.2 build.
+# Clean the whole package root, not just dist/housecarl: stale package-root extras
+# (START-HERE.txt, marketplace data, or a previous setup exe) must not survive into the zip.
 Step '0/10' 'Clean dist/ (package root)'
 if (Test-Path $PkgRoot) { Remove-Item $PkgRoot -Recurse -Force }
 New-Item -ItemType Directory -Path $DistRoot -Force | Out-Null
@@ -91,11 +89,11 @@ Get-ChildItem $ServerDir -Filter 'appsettings*.json' -ErrorAction SilentlyContin
 Step '3/10' 'Copy corpus.json beside the exe'
 Copy-Item $CorpusSrc (Join-Path $ServerDir 'corpus.json') -Force
 
-# ---- 4. bundle the 13 skills (exclude evals/ + _CORPUS_STATUS.md; KEEP all .jsonl) ----
+# ---- 4. bundle the 15 skills (router + helpers; exclude evals/ + _CORPUS_STATUS.md; KEEP all .jsonl) ----
 Step '4/10' 'Bundle skills'
 New-Item -ItemType Directory -Path $SkillsDir -Force | Out-Null
 foreach ($s in $Skills) {
-  $src = Join-Path $RepoRoot ".claude\skills\$s"
+  $src = Join-Path $RepoRoot ".agents\skills\$s"
   if (-not (Test-Path $src)) { throw "skill not found: $src" }
   Copy-Item $src (Join-Path $SkillsDir $s) -Recurse -Force
 }
@@ -105,7 +103,7 @@ Get-ChildItem $SkillsDir -File -Recurse -Filter '_CORPUS_STATUS.md' | Remove-Ite
 
 # ---- 5. plugin source files ------------------------------------------------
 Step '5/10' 'Copy plugin files'
-Copy-Item (Join-Path $PluginSrc '.claude-plugin') $DistRoot -Recurse -Force   # -> dist/housecarl/.claude-plugin/plugin.json
+Copy-Item (Join-Path $PluginSrc '.codex-plugin') $DistRoot -Recurse -Force   # -> dist/housecarl/.codex-plugin/plugin.json
 foreach ($f in @('.mcp.json','LICENSE','THIRD-PARTY-NOTICES.txt','README.md','CHANGELOG.md')) {
   Copy-Item (Join-Path $PluginSrc $f) (Join-Path $DistRoot $f) -Force
 }
@@ -114,27 +112,20 @@ foreach ($f in @('.mcp.json','LICENSE','THIRD-PARTY-NOTICES.txt','README.md','CH
 # These live in the PACKAGE ROOT (dist/), beside - not inside - dist/housecarl/, so the leak-check's
 # excluded-file scan (scoped to dist/housecarl) leaves them out, while the dev-path scan (step 8) still
 # covers them. Source: packaging/ (tracked). START-HERE.txt is version-stamped from plugin.json;
-# marketplace.json is the local CLI-install descriptor (`claude plugin marketplace add <this folder>`).
-Step '6/10' 'Package-root extras (START-HERE.txt + marketplace.json + codex umbrella)'
+# marketplace.json is the local Codex marketplace descriptor.
+Step '6/10' 'Package-root extras (START-HERE.txt + Codex marketplace)'
 $startHere = (Get-Content (Join-Path $PackagingSrc 'START-HERE.txt') -Raw) -replace '\{\{VERSION\}\}', $Version
 if ($startHere -match '\{\{') { throw "START-HERE.txt has an unresolved {{token}} after substitution" }
 [System.IO.File]::WriteAllText((Join-Path $PkgRoot 'START-HERE.txt'), $startHere, (New-Object System.Text.UTF8Encoding($false)))
-$MpDir = Join-Path $PkgRoot '.claude-plugin'
+$MpDir = Join-Path $PkgRoot '.agents\plugins'
 New-Item -ItemType Directory -Path $MpDir -Force | Out-Null
 Copy-Item (Join-Path $PackagingSrc 'marketplace.json') (Join-Path $MpDir 'marketplace.json') -Force
 
-# Codex-only umbrella skill (the $housecarl entry point for Codex). Ships at the PACKAGE ROOT
-# (dist/codex/), beside - not inside - dist/housecarl/, so the Claude install (which copies the
-# housecarl/ plugin tree wholesale) never picks it up; only the setup utility's Codex path places it.
-$CodexSrc = Join-Path $PluginSrc 'codex'
-if (Test-Path $CodexSrc) { Copy-Item $CodexSrc (Join-Path $PkgRoot 'codex') -Recurse -Force }
-
 # ---- 7. publish the setup utility into dist/ (beside the plugin) -----------
-# houseCARL-Setup.exe: the no-CLI desktop installer a user double-clicks. It copies the plugin into
-# ~/.claude/skills/housecarl/ (desktop auto-loads the skills) and registers the MCP server in
-# ~/.claude.json (desktop spawns it per session). It ships in the PACKAGE ROOT (dist\), beside - not
-# inside - the housecarl/ plugin tree, so the leak-check (which scans dist\housecarl only) correctly
-# leaves it out of scope. Single-file, SELF-CONTAINED (trimmed + compressed): setup must run on a
+# houseCARL-Setup.exe: the no-CLI installer a user double-clicks. It installs the server under the
+# user's local application data, copies the skills into ~/.agents/skills, and registers the MCP
+# server in ~/.codex/config.toml. It ships in the package root beside the plugin tree. Single-file,
+# SELF-CONTAINED (trimmed + compressed): setup must run on a
 # machine with no .NET installed at all, so it can preflight-check the two runtimes the
 # framework-dependent SERVER needs (.NET Runtime + ASP.NET Core Runtime - separate installers on
 # Windows) and say exactly which is missing. Trimming is safe HERE (setup uses only the
@@ -210,12 +201,12 @@ Write-Host ("Assembled plugin: {0}" -f $DistRoot)
 Write-Host ("  files: {0}   size: {1:N1} MB   skills: {2}" -f $fileCount, $totalMB, $skillCount)
 Write-Host ("  exe:         {0}" -f (Test-Path $Exe))
 Write-Host ("  corpus:      {0}" -f (Test-Path (Join-Path $ServerDir 'corpus.json')))
-Write-Host ("  manifest:    {0}" -f (Test-Path (Join-Path $DistRoot '.claude-plugin\plugin.json')))
+Write-Host ("  manifest:    {0}" -f (Test-Path (Join-Path $DistRoot '.codex-plugin\plugin.json')))
 Write-Host ("  setup util:  {0}   ({1})" -f (Test-Path $SetupExe), (Split-Path $SetupExe -Leaf))
 Write-Host ("  start-here:  {0}" -f (Test-Path (Join-Path $PkgRoot 'START-HERE.txt')))
-Write-Host ("  marketplace: {0}" -f (Test-Path (Join-Path $PkgRoot '.claude-plugin\marketplace.json')))
-Write-Host ("  codex skill: {0}" -f (Test-Path (Join-Path $PkgRoot 'codex\housecarl\SKILL.md')))
+Write-Host ("  marketplace: {0}" -f (Test-Path (Join-Path $PkgRoot '.agents\plugins\marketplace.json')))
+Write-Host ("  router skill:{0}" -f (Test-Path (Join-Path $SkillsDir 'housecarl\SKILL.md')))
 Write-Host ("Shippable zip:    {0}  ({1} MB, {2} entries)" -f $ZipPath, $ZipMB, $ZipEntryCount)
 Write-Host "`nDONE." -ForegroundColor Green
-Write-Host "Next - validation gate (necessary, not sufficient):" -ForegroundColor Yellow
-Write-Host ("    claude plugin validate `"{0}`" --strict" -f $DistRoot)
+Write-Host "Validation gate:" -ForegroundColor Yellow
+Write-Host "    dotnet run --project src/housecarl-generator -- plugin-validate-guard"

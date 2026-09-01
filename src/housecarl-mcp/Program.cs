@@ -1,7 +1,7 @@
 using HousecarlMcp;
 using ModelContextProtocol.Protocol;
 
-// houseCARL MCP server. DEFAULT transport is STDIO (the 1.0 launch model): the MCP client (Claude Code) spawns
+// houseCARL MCP server. DEFAULT transport is STDIO: Codex spawns
 // this exe and talks JSON-RPC over stdin/stdout — no port, no console window, no manual start. Pass --http to run
 // the localhost HTTP transport instead (kept for the curl-driven dev proofs). EITHER way it runs STANDALONE: it
 // reads the TRUE active load order STATICALLY from the configured MO2 instance's profile files (§8.5 — no USVFS, no
@@ -61,7 +61,7 @@ else
 //    order differently, a latent bug). Both branches call these; only the transport line itself differs. ──────────
 
 // houseCARL's OWN rulebook (corpus.json, shipped WITH the app) + the MO2-instance precedence (§6d): houseCARL.user.json
-// (in HOUSECARL_DATA_DIR = ${CLAUDE_PLUGIN_DATA} when set, else beside the exe; written by housecarl_set_mo2_instance at
+// (in HOUSECARL_DATA_DIR = ${PLUGIN_DATA} when set, else beside the exe; written by housecarl_set_mo2_instance at
 // RUNTIME) > explicit DataDir+ModsDir+ProfileDir (dev/non-portable) > Mo2InstanceDir (userConfig install dialog / appsettings)
 // > UNCONFIGURED (boots; tools prompt). The runtime user choice beats the install default. A corrupt user file never crashes boot (Q3).
 // Builds + registers the LoadOrderService; returns the bits the boot log needs.
@@ -74,7 +74,7 @@ static (LoadOrderService svc, bool explicitMode, string? instanceDir, string ins
         corpusPath = Path.Combine(AppContext.BaseDirectory, "corpus.json");
     CorpusRulebook.CorpusPath = Path.GetFullPath(corpusPath);
 
-    // user.json lives in the WRITABLE data dir — HOUSECARL_DATA_DIR (the plugin's ${CLAUDE_PLUGIN_DATA}, which survives
+    // user.json lives in the WRITABLE data dir — HOUSECARL_DATA_DIR (the plugin's ${PLUGIN_DATA}, which survives
     // updates) when set, else beside the exe (dev / non-plugin). NEVER under the plugin root: the client wipes that dir on
     // every plugin update, which would silently drop the user's saved MO2 instance (rulebook §6c / F1).
     var pluginDataDir = Environment.GetEnvironmentVariable("HOUSECARL_DATA_DIR");
@@ -130,7 +130,7 @@ static void AddMcp(IServiceCollection services, bool stdio)
 {
     var mcp = services.AddMcpServer(options =>
     {
-        // The houseCARL brand string lives HERE — the one place in code (CLAUDE.md §6). The version is the exe's
+        // The houseCARL brand string lives HERE — the one place in code (AGENTS.md §6). The version is the exe's
         // stamped InformationalVersion: build-plugin.ps1 passes -p:Version from plugin.json (the single version
         // home), so ServerInfo reports the REAL release; an unstamped dev build honestly says 0.0.0-dev.
         options.ServerInfo = new Implementation { Name = "houseCARL", Version = ServerVersion() };

@@ -238,7 +238,7 @@ public static class DescriptionVocabularyGuardProbe
     /// <para>The EXEMPTION-DEGENERATION TRIPWIRE, carried in from #386's first escalation: an exemption list that
     /// grows to fit the surface stops being a guard, because every future miss has somewhere to go. Three is not a
     /// capacity estimate — it is the point at which "this phrase is accurate here" stops being a handful of
-    /// recorded decisions and starts being a policy. Hitting it is a CLAUDE.md §4 escalation about the phrase
+    /// recorded decisions and starts being a policy. Hitting it is an AGENTS.md §4 escalation about the phrase
     /// list or the surface, never a number to raise in the same commit that needed it raised.</para></summary>
     const int MaxExemptions = 3;
 
@@ -1116,7 +1116,7 @@ public static class DescriptionVocabularyGuardProbe
         }
 
         // The table is empty today, so an INV2 arm would assert nothing about nothing and pass on every possible
-        // input — the shape CLAUDE.md's case law says to delete rather than strengthen. It materialises with the
+        // input — the shape AGENTS.md's case law says to delete rather than strengthen. It materialises with the
         // first declared row; until then the claim lives in RED-DEADEXEMPT / GREEN-DEADEXEMPT, where the same
         // detector runs against a synthetic table and can actually fail.
         if (Exemptions.Length > 0)
@@ -1188,7 +1188,7 @@ public static class DescriptionVocabularyGuardProbe
         var problems = new List<string>();
         if (exemptions.Length > MaxExemptions)
             problems.Add($"{exemptions.Length} exemptions declared, more than the {MaxExemptions} this guard may carry — a list that "
-                       + "can absorb any miss is an allowlist of the surface, not a guard. This is a CLAUDE.md §4 escalation about "
+                       + "can absorb any miss is an allowlist of the surface, not a guard. This is an AGENTS.md §4 escalation about "
                        + "the phrase list or the surface, not a number to raise in the commit that needed it raised.");
         foreach (var e in exemptions)
         {

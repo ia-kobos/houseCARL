@@ -102,7 +102,7 @@ public static class BindingShimProbe
             failures += Check("B coerce: plugins as bare string binds and runs the tool body",
                 !b.text.Contains(GenericError) && b.text.Contains(ConfigPrompt), b.Describe());
 
-            // -- B2: the VERIFIED live Claude Code shape (#36) — the whole array serialized as a JSON STRING.
+            // -- B2: the tolerated legacy client shape (#36) — the whole array serialized as a JSON string.
             //    Must parse as the array it spells, bind, and reach the tool body — never the generic error,
             //    and never a one-element array holding the unparsed text (which would fail later, misleadingly).
             var b2 = Call(stdin, stdout, 30, "housecarl_cross_plugin_query",

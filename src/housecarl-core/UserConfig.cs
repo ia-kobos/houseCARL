@@ -122,7 +122,7 @@ public sealed class UserConfigStore
             {
                 var cfg = ReadOrRecover(out note);
                 mutate(cfg);
-                var dir = Path.GetDirectoryName(_path);   // the data dir (${CLAUDE_PLUGIN_DATA}) may not exist on the first save
+                var dir = Path.GetDirectoryName(_path);   // the data dir (${PLUGIN_DATA}) may not exist on the first save
                 if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
                 var tmp = _path + ".tmp";
                 File.WriteAllText(tmp, JsonSerializer.Serialize(cfg, Json));

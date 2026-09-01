@@ -35,7 +35,7 @@ namespace HousecarlCore;
 //  against delete / rename / overwrite — exactly MO2's, xEdit's, and Explorer's workflow. The prior build held
 //  EVERY plugin open for the whole process (~3,400 locks), which IS the retrospective's ship-blocking
 //  "cleanup-gotcha" (RETROSPECTIVE_PIVOT §37). Holding zero handles at rest makes the lock ABSENT (not merely
-//  permissive) and every read always-live (no stale-view seam) — what CLAUDE.md §1 already promises ("no held
+//  permissive) and every read always-live (no stale-view seam) — what AGENTS.md §1 already promises ("no held
 //  state… cheap mtime re-checks not live-tracking… no MO2 lock-fighting"), now true by construction.
 //
 //  ORDER IS INJECTED. Build takes the plugin paths already in priority order. Override COUNTS/DEPTHS and tree

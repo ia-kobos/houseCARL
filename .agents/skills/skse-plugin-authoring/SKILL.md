@@ -13,7 +13,7 @@ Authoring an SKSE plugin means writing a native **C++ DLL** on **CommonLibSSE-NG
 and every crash logger are SKSE DLLs; this skill is how you build one, extend one, or read one. The output
 is a `SKSE/Plugins/<name>.dll` a user drops into a mod folder — not an `.esp`, and not a `.psc`.
 
-Claude Code **can** do the whole loop natively: it compiles C++ against CommonLibSSE-NG on this machine,
+Codex **can** do the whole loop natively: it compiles C++ against CommonLibSSE-NG on this machine,
 scaffolds the project, and iterates build → deploy → check-the-log. What it **needs** is the toolchain in
 place — MSVC, CMake, vcpkg (or xmake) — which is the Step-0 gate below. Nothing here calls a houseCARL MCP
 tool for the C++ build itself; the C++ compiler is the engine, and houseCARL tools touch only the `.psc`

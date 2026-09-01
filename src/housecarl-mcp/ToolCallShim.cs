@@ -215,7 +215,7 @@ internal static class ToolCallShim
             var s = value.GetString() ?? "";
             if (declared.Contains("array"))
             {
-                // A string-ENCODED JSON array first — the verified live Claude Code shape (#36): the client
+                // A string-encoded JSON array first — a tolerated legacy client shape (#36): the client
                 // serializes array arguments into a JSON STRING ("[\"a\",\"b\"]") even though the published
                 // schema correctly declares the array. Parse it as the array it spells; only an unambiguous
                 // parse is taken — anything else (including a bare string that merely starts with '[') falls

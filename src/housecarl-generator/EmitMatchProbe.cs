@@ -5,7 +5,7 @@ namespace HousecarlGenerator;
 /// <summary>
 /// emit-match-guard (#351) — the COMMITTED mutagen-reference shards must equal what the generator emits today.
 ///
-/// <c>.claude/skills/mutagen-reference/references/*.jsonl</c> is a generated artifact that is also checked in:
+/// <c>.agents/skills/mutagen-reference/references/*.jsonl</c> is a generated artifact that is also checked in:
 /// it ships in the plugin and it is what a dev-mode skill — and a reviewer checking a classification claim —
 /// actually reads. Every other corpus guard regenerates into a temp dir and asserts against THAT, so a change to
 /// the classifier or the emitter that lands without a regeneration leaves the shipped reference stale with CI
@@ -26,7 +26,7 @@ namespace HousecarlGenerator;
 public static class EmitMatchProbe
 {
     /// <summary>CWD-relative, matching every other tree-reading probe here; CI runs from the repo root.</summary>
-    static readonly string CommittedRefDir = Path.Combine(".claude", "skills", "mutagen-reference", "references");
+    static readonly string CommittedRefDir = Path.Combine(".agents", "skills", "mutagen-reference", "references");
 
     const string Remedy =
         "regenerate and commit the result: dotnet run --project src/housecarl-generator -c Release";

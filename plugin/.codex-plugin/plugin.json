@@ -1,0 +1,27 @@
+{
+  "name": "housecarl",
+  "version": "1.9.0",
+  "description": "Comprehensive data-layer access to your Skyrim SE load order — read any record, author patches into a new plugin, look mods up on Nexus, and look up record schemas, Papyrus signatures, performance reviews, and distributor grammars — in plain English.",
+  "author": { "name": "Avick3110" },
+  "homepage": "https://github.com/Avick3110/houseCARL",
+  "repository": "https://github.com/Avick3110/houseCARL",
+  "license": "GPL-3.0-only",
+  "keywords": ["skyrim", "modding", "mod-organizer-2", "mutagen", "xedit", "papyrus", "animation"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "houseCARL",
+    "shortDescription": "Skyrim SE and MO2 data-layer modding",
+    "longDescription": "Read, inspect, and safely patch a Skyrim Special Edition load order through houseCARL's local MCP server and bundled specialist skills.",
+    "developerName": "Avick3110",
+    "category": "Coding",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Show me the current Skyrim load order and its conflicts.",
+      "Inspect this record and explain which plugin wins.",
+      "Create a reviewable patch for this load-order change."
+    ],
+    "websiteURL": "https://github.com/Avick3110/houseCARL",
+    "brandColor": "#6B7280"
+  }
+}

@@ -31,7 +31,7 @@ namespace HousecarlGenerator;
 ///       NO flat <c>SkyrimGroup&lt;T&gt;</c>, so the generic dispatch can't reach it — a CLEAN loud-fail boundary, not a
 ///       silent miss. Plus: the <c>Globals</c> group's T (<c>Global</c>) is ABSTRACT — does <c>AddNew()</c> work or need
 ///       a typed variant? These two decide Create's scope (recommend flat-create-by-construction now; surface nested +
-///       abstract-T) — an Aaron call (CLAUDE.md §4 / §5.5).
+///       abstract-T) — an Aaron call (AGENTS.md §4 / §5.5).
 ///
 /// Recon only: writes to a temp dir, touches no tracked file, reports loud (Q3).
 /// </summary>

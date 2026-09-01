@@ -1,6 +1,6 @@
 # houseCARL
 
-**Comprehensive, data-layer access to your Skyrim Special Edition load order — in plain English, through Claude or Codex.**
+**Comprehensive, data-layer access to your Skyrim Special Edition load order — in plain English, through Codex.**
 
 houseCARL runs a local MCP server with [Mutagen](https://github.com/Mutagen-Modding/Mutagen) — the
 Bethesda-format library — kept warm in memory, giving your AI assistant direct access to every plugin
@@ -83,7 +83,7 @@ models — by construction, not a hand-maintained subset.
   compatibility patch installed on purpose isn't misread as out of date; trace a file to its mod by MD5
   hash; and a raw GraphQL backstop reaches any field the curated tools don't surface yet. All keyless and
   read-only: it finds and informs; downloading stays your mod manager's "Mod Manager Download" handoff.
-- **Look things up, author distributor files, and review scripts** through 13 bundled, namespaced skills:
+- **Look things up, author distributor files, and review scripts** through 14 bundled helper skills:
   record schemas (every type Mutagen models), Papyrus / SKSE signatures, SkyPatcher / SPID / KID
   distributor grammars, Skyrim dialogue authoring, Open Animation Replacer config authoring, SKSE plugin
   (C++/CommonLibSSE-NG) authoring, Papyrus performance review, dark-face NPC diagnosis, equip-slot lookup,
@@ -100,9 +100,7 @@ models — by construction, not a hand-maintained subset.
   both and tells you exactly which is missing.
 - **[Mod Organizer 2](https://www.modorganizer.org/)** with a modlist. houseCARL reads the instance's
   profile files statically — **MO2 does not need to be running.**
-- **An AI host:** [Claude Code](https://claude.com/claude-code) (v2.1.143 or newer) — either the terminal
-  CLI or the Claude desktop app, which has Claude Code built in (houseCARL runs in Claude Code sessions,
-  not the plain chat) — **or** OpenAI Codex.
+- **OpenAI Codex** with plugin support.
 
 ## Install
 
@@ -110,21 +108,31 @@ models — by construction, not a hand-maintained subset.
 
 1. Download **`houseCARL-1.9.0.zip`** from the [latest release](https://github.com/Avick3110/houseCARL/releases).
 2. Unzip it and run **`houseCARL-Setup.exe`**.
-3. Pick your host — **`[1] Claude Code`**, **`[2] Codex`**, or **`[3] Both`**. The installer wires
-   everything up:
-   - **Claude** → installs the skills to `~/.claude/skills/housecarl/` and registers the server in
-     `~/.claude.json` (both the Claude Code CLI and the desktop app read these). Persistent — no
-     per-session flag.
-   - **Codex** → installs the server under `%LOCALAPPDATA%\houseCARL\server\`, installs the skills (with a
-     `$housecarl` umbrella entry point) under `~/.agents/skills/`, and registers the server in
-     `~/.codex/config.toml`.
-4. Fully restart your host (quit and reopen the Claude desktop app / restart every Codex session), then
+3. The installer places the server under `%LOCALAPPDATA%\houseCARL\server\`, installs the skills
+   (including the `$housecarl` router) under `~/.agents/skills/`, and registers the server in
+   `~/.codex/config.toml`.
+4. Fully restart Codex, then
    tell houseCARL your **MO2 instance folder** — the one containing `ModOrganizer.ini`. It prompts you on
    first use; you can switch instances anytime by asking it to set a new one.
 
-> **Updating an existing install?** Fully quit Claude Code (and Codex) before re-running
+> **Updating an existing install?** Fully quit Codex before re-running
 > `houseCARL-Setup.exe` — it can't replace the server while a session is running it. If one is, it stops and
 > tells you to quit and re-run.
+
+### Install as a Codex plugin
+
+From the unzipped release folder:
+
+```powershell
+codex plugin marketplace add .
+codex plugin add housecarl@housecarl
+```
+
+Restart Codex after installation. Use either this plugin path or `houseCARL-Setup.exe`; installing both
+creates duplicate skill/server registrations.
+
+For a source checkout, run `./scripts/build-plugin.ps1` first, then run the same marketplace commands
+from `./dist`.
 
 ### Build from source (developers / verifiers)
 
@@ -139,8 +147,7 @@ cd houseCARL
 The script regenerates the reflection rulebook, publishes the server framework-dependent (trimming **off**
 — houseCARL is reflection-driven, so trimming would strip types and silently lose coverage), bundles the
 skills, builds the setup utility, and packs `release/houseCARL-1.9.0.zip`. Install the output with
-`houseCARL-Setup.exe`, `claude --plugin-dir ./dist/housecarl`, or the bundled local-marketplace
-descriptor — see the script header for details.
+`houseCARL-Setup.exe` or the bundled Codex marketplace descriptor.
 
 ## Usage
 
@@ -165,7 +172,7 @@ it never downloads or installs (that stays your mod manager's `nxm` "Mod Manager
 
 ## Bundled skills
 
-Namespaced under `/housecarl:` in Claude (and reachable via `$housecarl` in Codex):
+Routed through `$housecarl` in Codex:
 
 - **`mutagen-reference`** — every record type's schema (fields, types, writability, enums, polymorphic
   arms), generated by reflection over Mutagen.
@@ -209,6 +216,8 @@ Namespaced under `/housecarl:` in Claude (and reachable via `$housecarl` in Code
   loops, with the game-generic Creation-Kit conventions those jobs need and one canonical deliverable schema
   so a fleet of subagents doesn't invent a different output shape each. Game-generic only — a specific mod's
   own conventions stay in that mod's skill.
+- **`npc-appearance-copy`** — copy an NPC's appearance onto another NPC or into a standalone clone while
+  preserving the correct record, facegen, and dependency boundaries.
 
 ## License
 

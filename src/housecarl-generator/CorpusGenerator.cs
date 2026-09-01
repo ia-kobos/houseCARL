@@ -891,7 +891,7 @@ public static class CorpusGenerator
     // A non-writable field fitting NONE of them is a possible
     // regression — a content field that lost its setter via a Mutagen bump or a reflection miss (the
     // failure mode the generic-getter `1 bug was, CorpusGenerator §MutableInterfaceFor) — and is
-    // surfaced loud in Report's anomaly list, never passed over silently (CLAUDE.md §3 fail-loud).
+    // surfaced loud in Report's anomaly list, never passed over silently (AGENTS.md §3 fail-loud).
     //
     //   R0 identity          — FormKey / ModKey: record identity, read-only by design, any type.
     //   R1 no-mutable-iface  — the type exposes no mutable interface at all (read-only construct:

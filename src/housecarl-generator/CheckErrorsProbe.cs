@@ -2420,7 +2420,7 @@ public static class CheckErrorsProbe
 
     /// <summary>Follow the overrun notice's own remedy: read the number it tells the caller to raise max_chars to,
     /// re-render at exactly that, and see whether the notice is gone. A remedy is a claim about a call that has not
-    /// happened, so the only honest way to hold it is to make the call (CLAUDE.md §5 #11).</summary>
+    /// happened, so the only honest way to hold it is to make the call (AGENTS.md §5 #11).</summary>
     static bool RemedyClearsTheNotice(ErrorCheckResult r, out string detail)
     {
         var bad = new List<string>();

@@ -337,5 +337,5 @@ static bool IsDirectoryArgument(string a)
 var outputDir = Path.GetFullPath(args.Length > 0 ? args[0] : "generated");
 // The slim reference tree ships INSIDE the skill (tracked); corpus.json + summary stay in generated/.
 // Default assumes the generator is run from the repo root (as `dotnet run --project src/housecarl-generator`).
-var refDir = Path.GetFullPath(args.Length > 1 ? args[1] : Path.Combine(".claude", "skills", "mutagen-reference", "references"));
+var refDir = Path.GetFullPath(args.Length > 1 ? args[1] : Path.Combine(".agents", "skills", "mutagen-reference", "references"));
 return CorpusGenerator.GenerateAll(outputDir, refDir);

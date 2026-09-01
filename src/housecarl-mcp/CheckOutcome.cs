@@ -13,7 +13,7 @@ namespace HousecarlMcp;
 /// rounds found the same class five times, and the folds for it generated it again: a scope sentence counting
 /// refused seeds as validated ones, a response-level "ran every family" chosen off the SELECTION while one family's
 /// whole section was a refusal, a duplicate key in one family object, a reserve that did not measure four fields
-/// the render writes. CLAUDE.md §5 #11's class rule fired, and the ruling (Aaron-go 2026-08-22) is this value: the
+/// the render writes. AGENTS.md §5 #11's class rule fired, and the ruling (Aaron-go 2026-08-22) is this value: the
 /// rule this branch already applies to individual sentences — one computation, two transports — raised one level.
 /// </para>
 ///

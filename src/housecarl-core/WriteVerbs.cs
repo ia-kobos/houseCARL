@@ -61,7 +61,7 @@ public readonly record struct VerbUse(string Verb, VerbInput Input, bool NeedsKe
 /// named two of the five list verbs; the leaf-bracket remedy offered both cardinalities' verbs at once and left the
 /// caller to work out which half was theirs. Adding <c>InsertAtIndex</c> (#302) made the drift visible by adding an
 /// eighth name to keep in sync, but it did not cause it — a hand-maintained copy of a set rots whether or not the
-/// set is growing. Two consecutive pre-PR review rounds returned instances of it, which is the CLAUDE.md §11
+/// set is growing. Two consecutive pre-PR review rounds returned instances of it, which is the AGENTS.md §11
 /// class-stop: the fix is the generator, not another round of copies.</para>
 ///
 /// <para><b>What a caller gets.</b> <see cref="On"/> maps a <see cref="CollectionShape"/> to the verbs that WORK on
@@ -93,7 +93,7 @@ public static class WriteVerbs
     /// <see cref="AllRecital"/> states the same names a second time, as the caller-facing literal an attribute can
     /// concatenate — see its summary for what that does and does not establish. <see cref="On"/> is the one home
     /// for which of them apply where. The prose home for the set as DOCUMENTATION is the tool-surface SPEC, which
-    /// CLAUDE.md points readers at — two audiences, not two authorities on one fact.</summary>
+    /// AGENTS.md points readers at — two audiences, not two authorities on one fact.</summary>
     public static readonly IReadOnlyList<string> All =
         new[] { "Set", "Add", "Remove", "SetAtIndex", "InsertAtIndex", "ReplaceAll", "Merge", "CopyFrom" };
 

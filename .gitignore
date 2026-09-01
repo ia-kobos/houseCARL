@@ -61,18 +61,13 @@ dist/
 ## Build artifact, reproducible on demand; never source-of-truth.
 release/
 
-## Agent worktrees — transient git worktrees created under .claude/worktrees/ by Claude sessions (solo or parallel).
-## Each is an isolated checkout of a claude/<name> branch; never source-of-truth, removed once merged.
-.claude/worktrees/
-
-## Scheduled-task lock — a per-process runtime lock the harness writes (carries a session id + pid).
-## Transient, never source-of-truth; like the worktrees above, it must never enter a commit.
-.claude/scheduled_tasks.lock
+## Agent worktrees — transient isolated checkouts, removed once merged.
+.worktrees/
 
 ## Skill eval RUN-RECORDS — per-run validation outputs (trigger / outcome results) under a skill's
 ## evals/. The eval SET (eval_set.json) is committed; run-records are dev-local, and the detailed
 ## ones can carry a tester's private load-order data, so they live in dev/ (private), never here.
-.claude/skills/*/evals/*-RESULTS.md
+.agents/skills/*/evals/*-RESULTS.md
 
 ## Internal dev workspace — PRFAQ corpus, plans, session handoffs, review audits, references, and
 ## spike code. houseCARL's private working area, carved from the public repo at GitHub go-live

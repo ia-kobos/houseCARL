@@ -8,7 +8,7 @@ namespace HousecarlGenerator;
 /// with the allocation, cap and remedy properties driven over EVERY one of them.
 ///
 /// <para><b>Why it exists.</b> Review round 2 (2026-08-22) found six separate conditionals with no arm that could
-/// fail, and CLAUDE.md §5 #11's class rule fired on them together: the arms were being written one per FINDING,
+/// fail, and AGENTS.md §5 #11's class rule fired on them together: the arms were being written one per FINDING,
 /// never from an inventory of the shapes the surface produces, so whole shapes had no fixture at all. The headline
 /// instance was that no merged <c>counts_only</c> render at a biting cap existed anywhere in <c>check-guard</c> —
 /// which is precisely the shape #394 is about, so <c>HistogramByTarget</c>, <c>HistogramBySource</c>,

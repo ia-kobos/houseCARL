@@ -19,7 +19,7 @@ namespace HousecarlMcp;
 /// path) is located by the shared on-disk contract and read off its own overlay
 /// (<c>LoadOrderService.ResolveOffOrderForwardSource</c>, the forward twin of the <c>CopyFrom</c> lane's
 /// <c>ResolveOffOrderCopySources</c>). PR #311 shipped the off-order arm as a DECLARED BOUND; declaring it made it
-/// honest but not right, since re-asserting a disabled mod's version is exactly the inactive-plugin case CLAUDE.md §1
+/// honest but not right, since re-asserting a disabled mod's version is exactly the inactive-plugin case AGENTS.md §1
 /// names — so it was lifted rather than left.</para>
 /// </summary>
 [McpServerToolType]

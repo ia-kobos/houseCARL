@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to houseCARL are documented here. Versioning is [semantic](https://semver.org);
-the `version` in `.claude-plugin/plugin.json` is bumped on each release, so installed users update only
+the `version` in `.codex-plugin/plugin.json` is bumped on each release, so installed users update only
 when it changes.
 
 **Writing an entry.** State what the tool now does or refuses. Where a change has a bound — a case it does
@@ -12,6 +12,10 @@ is a second copy of a fact that will be edited once. No frequency or coverage ad
 saying it sets an expectation their install may contradict. Say what is known, and say how they can check.
 
 ## Unreleased
+
+- **The distribution is Codex-only.** The package now uses a Codex manifest and marketplace, ships all
+  skills from `.agents/skills`, registers only the Codex MCP server, and removes the former dual-host
+  installer and documentation paths. The MCP engine and its non-destructive write contracts are unchanged.
 
 - **`housecarl_records` truncation and expansion notices name that tool's own parameters — on the forms and
   lanes listed here.** When a read hit `max_chars`, the notice told you to narrow with `fields=` and lower

@@ -230,7 +230,7 @@ internal readonly record struct HistogramAxis(SweepSubject Subject, IReadOnlyLis
 ///
 /// <para>An explicit "the response has gone over, stop everything" flag was written here first and then deleted:
 /// monotonic length already makes it true, so the flag could be removed with every arm still green. A conditional
-/// that cannot be fixtured honestly is the signal to delete it, not a testing gap to work around (CLAUDE.md §5 #11,
+/// that cannot be fixtured honestly is the signal to delete it, not a testing gap to work around (AGENTS.md §5 #11,
 /// PR #339's precedent).</para>
 ///
 /// <para>The FIXED PART is outside the emission gate entirely: the header, every axis's unconditional lines, every
