@@ -104,7 +104,7 @@ references/
   project's no-guesswork gate.
 - **Layer 2 — DONE pending review.** `SKILL.md` (procedural + bundled-or-warn, modeled on
   `spid-authoring`; carries `name: kid-authoring` per the **revised 2026-06-04 standard** — `name:` =
-  folder, required for Codex + Claude dual-host), `index.jsonl` (router, consistent with the siblings),
+  folder), `index.jsonl` (router, consistent with the siblings),
   and `evals/eval_set.json` (`HOUSECARL_SKILL_AUTHORING.md` §6.5 fan-out — 20 fresh-context Sonnet
   agents, anonymized routing menu: **recall 10/10, specificity 10/10**, both gates passed). §8 shipping
   checklist walked — all **19** items pass (SKILL.md 133 lines; description 1029 chars; `name:` = folder

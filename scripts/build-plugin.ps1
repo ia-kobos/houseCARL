@@ -59,9 +59,8 @@ if (-not $Version) { throw "could not read 'version' from $PluginManifest" }
 Write-Host ("Building houseCARL v{0}" -f $Version) -ForegroundColor Green
 
 # ---- 0. clean --------------------------------------------------------------
-# Clean the WHOLE package root, not just dist/housecarl: stale package-root extras (codex/,
-# START-HERE.txt, a previous setup exe) would otherwise survive into the zip - a stale nested
-# codex/codex/ subtree did exactly that at the 1.2.2 build.
+# Clean the WHOLE package root, not just dist/housecarl: stale package-root extras
+# (START-HERE.txt, a previous setup exe) would otherwise survive into the zip.
 Step '0/10' 'Clean dist/ (package root)'
 if (Test-Path $PkgRoot) { Remove-Item $PkgRoot -Recurse -Force }
 New-Item -ItemType Directory -Path $DistRoot -Force | Out-Null
@@ -115,19 +114,13 @@ foreach ($f in @('.mcp.json','LICENSE','THIRD-PARTY-NOTICES.txt','README.md','CH
 # excluded-file scan (scoped to dist/housecarl) leaves them out, while the dev-path scan (step 8) still
 # covers them. Source: packaging/ (tracked). START-HERE.txt is version-stamped from plugin.json;
 # marketplace.json is the local CLI-install descriptor (`claude plugin marketplace add <this folder>`).
-Step '6/10' 'Package-root extras (START-HERE.txt + marketplace.json + codex umbrella)'
+Step '6/10' 'Package-root extras (START-HERE.txt + marketplace.json)'
 $startHere = (Get-Content (Join-Path $PackagingSrc 'START-HERE.txt') -Raw) -replace '\{\{VERSION\}\}', $Version
 if ($startHere -match '\{\{') { throw "START-HERE.txt has an unresolved {{token}} after substitution" }
 [System.IO.File]::WriteAllText((Join-Path $PkgRoot 'START-HERE.txt'), $startHere, (New-Object System.Text.UTF8Encoding($false)))
 $MpDir = Join-Path $PkgRoot '.claude-plugin'
 New-Item -ItemType Directory -Path $MpDir -Force | Out-Null
 Copy-Item (Join-Path $PackagingSrc 'marketplace.json') (Join-Path $MpDir 'marketplace.json') -Force
-
-# Codex-only umbrella skill (the $housecarl entry point for Codex). Ships at the PACKAGE ROOT
-# (dist/codex/), beside - not inside - dist/housecarl/, so the Claude install (which copies the
-# housecarl/ plugin tree wholesale) never picks it up; only the setup utility's Codex path places it.
-$CodexSrc = Join-Path $PluginSrc 'codex'
-if (Test-Path $CodexSrc) { Copy-Item $CodexSrc (Join-Path $PkgRoot 'codex') -Recurse -Force }
 
 # ---- 7. publish the setup utility into dist/ (beside the plugin) -----------
 # houseCARL-Setup.exe: the no-CLI desktop installer a user double-clicks. It copies the plugin into
@@ -214,7 +207,6 @@ Write-Host ("  manifest:    {0}" -f (Test-Path (Join-Path $DistRoot '.claude-plu
 Write-Host ("  setup util:  {0}   ({1})" -f (Test-Path $SetupExe), (Split-Path $SetupExe -Leaf))
 Write-Host ("  start-here:  {0}" -f (Test-Path (Join-Path $PkgRoot 'START-HERE.txt')))
 Write-Host ("  marketplace: {0}" -f (Test-Path (Join-Path $PkgRoot '.claude-plugin\marketplace.json')))
-Write-Host ("  codex skill: {0}" -f (Test-Path (Join-Path $PkgRoot 'codex\housecarl\SKILL.md')))
 Write-Host ("Shippable zip:    {0}  ({1} MB, {2} entries)" -f $ZipPath, $ZipMB, $ZipEntryCount)
 Write-Host "`nDONE." -ForegroundColor Green
 Write-Host "Next - validation gate (necessary, not sufficient):" -ForegroundColor Yellow

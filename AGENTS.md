@@ -1,7 +1,7 @@
 # AGENTS.md — houseCARL
 
-Guidance for AI coding agents (Codex, and others that read `AGENTS.md`) working in this
-repository. houseCARL's deep operating manual is **[`CLAUDE.md`](CLAUDE.md)** — read it first;
+Guidance for AI coding agents that look for `AGENTS.md` by convention. houseCARL targets
+Claude Code, and its deep operating manual is **[`CLAUDE.md`](CLAUDE.md)** — read that first;
 this file is the agent-agnostic companion, focused on a review checklist for pull requests.
 For what houseCARL *is* and how to build it, see **[`README.md`](README.md)**.
 

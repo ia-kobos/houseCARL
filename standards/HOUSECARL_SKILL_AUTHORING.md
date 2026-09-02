@@ -1,7 +1,7 @@
 # HOUSECARL_SKILL_AUTHORING — Skill Authoring Standard
 
-**Status:** locked 2026-04-30 by Aaron; **pruned 2026-06-03** — the AD-4 meta-skill cluster (`skill-authoring` / `modlist-authoring` / `knowledge-file-authoring`) and the retired unpack-model "user-side authoring" surface were removed when houseCARL moved to plugin packaging. The methodology below governs houseCARL's own shipped skills; some legacy Claude_MO2 / Q-lock scaffolding remains as illustrative history (a fuller modernization is a separate pass). **Revised 2026-06-04** (Aaron-approved): the `name:` rule (§ 2) is reversed — shipped skills now install into **both Claude Code and Codex**, and Codex requires a `name:` field in `SKILL.md`.
-**Scope:** Binding standard for every skill shipped under the Housecarl project (`.claude/skills/<name>/SKILL.md` inside the Housecarl repo, plus any skills bundled into the MCP plugin distribution). Shipped skills install into **both Claude Code and Codex** (Codex support added 2026-06-04), so every rule below must hold for both hosts.
+**Status:** locked 2026-04-30 by Aaron; **pruned 2026-06-03** — the AD-4 meta-skill cluster (`skill-authoring` / `modlist-authoring` / `knowledge-file-authoring`) and the retired unpack-model "user-side authoring" surface were removed when houseCARL moved to plugin packaging. The methodology below governs houseCARL's own shipped skills; some legacy Claude_MO2 / Q-lock scaffolding remains as illustrative history (a fuller modernization is a separate pass). **Revised 2026-06-04**: the `name:` rule (§ 2) was reversed for Codex compatibility. **Revised 2026-09-02**: Codex support was removed; `name:` is retained as a house convention (§ 2).
+**Scope:** Binding standard for every skill shipped under the Housecarl project (`.claude/skills/<name>/SKILL.md` inside the Housecarl repo, plus any skills bundled into the MCP plugin distribution). Shipped skills install into **Claude Code**.
 This standard is operational. Every rule below is enforceable by a reviewer producing a binary "conforms / doesn't conform" verdict. Rules without that property don't belong here.
 
 ---
@@ -39,7 +39,7 @@ Source: <https://code.claude.com/docs/en/skills> § "Add supporting files".
 **Naming rules** (binding):
 
 - **Skill folder name** is `kebab-case`, lowercase, ≤ 30 characters, alphanumeric + hyphens only. Conforms: `leveled-list-patching`, `crash-diagnostics`. Doesn't conform: `LeveledListPatching`, `leveled_list_patching`, `lvl_list`, `merge-leveled-list-patches-and-related-things`.
-- **Folder name == `name:` frontmatter value.** Include `name: <folder-slug>` in the frontmatter, set **exactly equal to the folder name**. Codex *requires* a `name` field in `SKILL.md`; Claude Code derives the name from the folder when `name` is absent — so writing `name:` equal to the folder slug satisfies **both hosts** at once. The folder stays the conceptual source of truth and `name:` must mirror it exactly; a reviewer rejects any skill whose `name:` is missing or differs from its folder. *(Reversed 2026-06-04: this standard previously mandated **omitting** `name:` — correct for a Claude-only world, but it produces Codex-invalid skills, which is exactly why houseCARL's first four skills shipped without it and had to be retrofitted.)*
+- **Folder name == `name:` frontmatter value.** Include `name: <folder-slug>` in the frontmatter, set **exactly equal to the folder name**. The folder stays the conceptual source of truth and `name:` must mirror it exactly; a reviewer rejects any skill whose `name:` is missing or differs from its folder. *(History: this standard originally mandated **omitting** `name:` — Claude Code derives it from the folder — then reversed on 2026-06-04 because Codex required the field. Codex support was removed 2026-09-02, so the field is no longer load-bearing; it is kept as a house convention because every shipped skill already carries it and an in-file name keeps the skill self-describing. Dropping it would be equally valid under Claude Code alone, at the cost of churning every `SKILL.md`.)*
 - **Skill names must NOT embed a Housecarl version.** `npc-analysis` conforms. `npc-analysis-v2`, `npc-analysis-v3-rebuild` don't — versioning happens through the repo's git history, not skill names.
 - **Skill names must NOT carry the project name.** `crash-diagnostics` conforms. `housecarl-crash-diagnostics` doesn't — the namespace is implicit from the directory.
 - **Skill names must describe the user-facing topic, not the internal mechanism.** `leveled-list-patching` conforms. `mutagen-bridge-write-helper` doesn't.
@@ -399,7 +399,7 @@ This section names every observed Claude_MO2 skill failure mode and the specific
 Before a Housecarl skill merges to main:
 
 1. ☐ Skill folder name conforms to § 2.
-2. ☐ Frontmatter includes `name:` set **equal to the folder name** (§ 2) — Codex requires it; a missing or mismatched `name:` fails review.
+2. ☐ Frontmatter includes `name:` set **equal to the folder name** (§ 2) — a missing or mismatched `name:` fails review.
 3. ☐ Description leads with action verb phrase (§ 3.1).
 4. ☐ Description contains ≥ 3 concrete user-utterance trigger nouns — in the action-first lead or a "Use…" clause (§ 3.2 as amended 2026-07-29).
 5. ☐ Description carries a compact pushy tail clause if the skill has an early-load hazard; no spelled-out tail sentences (§ 3.3).
@@ -416,7 +416,7 @@ Before a Housecarl skill merges to main:
 16. ☐ Eval set ≥ 8 should-trigger + ≥ 8 should-not-trigger, including near-misses, all queries plausible utterances (§ 6.2).
 17. ☐ Trigger-reliability validation via the §6.5 fan-out shows recall ≥ 80%, specificity ≥ 50% (§ 6.3).
 18. ☐ Eval set archived alongside the skill (e.g., `.claude/skills/<name>/evals/eval_set.json`) so future re-validation is reproducible.
-19. ☐ Skill added to the `$Skills` array in `scripts/build-plugin.ps1` so it bundles into the plugin — and thus installs for **both** Claude Code and Codex. A skill absent from that list ships to neither host.
+19. ☐ Skill added to the `$Skills` array in `scripts/build-plugin.ps1` so it bundles into the plugin. A skill absent from that list does not ship.
 
 A skill failing any of items 1-15 or 19 fails review on the spot. Items 16-18 may be deferred only with explicit Aaron sign-off and a tracked follow-up.
 
