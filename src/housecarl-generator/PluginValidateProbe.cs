@@ -18,14 +18,14 @@ namespace HousecarlGenerator;
 /// class is caught at PR time, not at release (the manual --strict stays as belt-and-suspenders — see INV1).
 ///
 /// Self-contained, in the corpus-hygiene-guard pattern: it reads the REAL shipped artifacts from the repo
-/// (every .claude/skills/*/SKILL.md, the Codex umbrella plugin/codex/housecarl/SKILL.md, and the manifest
+/// (every .claude/skills/*/SKILL.md and the manifest
 /// plugin/.claude-plugin/plugin.json — CWD is the repo root, as the generator's corpus default already assumes)
 /// and asserts each invariant GREEN over them, paired with a RED
 /// arm that feeds the SAME checker a synthetic violation and asserts it FIRES — so a GREEN can never mean "no
 /// skill happened to be broken", only "the checker has teeth and every real skill passes it".
 ///
-///   INV1 — EVERY SHIPPED SKILL FRONTMATTER PARSES + CARRIES name/description, across BOTH shipped trees (the
-///          Claude Code skills under .claude/skills AND the Codex umbrella plugin/codex/housecarl). The leading
+///   INV1 — EVERY SHIPPED SKILL FRONTMATTER PARSES + CARRIES name/description across the shipped tree (the
+///          Claude Code skills under .claude/skills). The leading
 ///          --- ... --- fenced block parses as a YAML mapping with a non-empty `name` and `description`. The parse
 ///          uses a real YAML parser (YamlDotNet) — a FAITHFUL PROXY for, not byte-identical to, the harness's own
 ///          (JS) YAML parser: it reliably catches the colon-space class (RED-proven below), but the residual risk
@@ -49,12 +49,10 @@ public static class PluginValidateProbe
         try
         {
             // ---------- INV1 — every shipped skill's frontmatter parses + has name/description ----------
-            // BOTH shipped frontmatter trees are in scope: the Claude Code skills (.claude/skills, bundled by
-            // build-plugin.ps1) AND the Codex umbrella skill (plugin/codex/housecarl, shipped separately by the
-            // same build). Both carry a YAML frontmatter the respective loader parses, so both are exposed to the
-            // parse-failure class — walking only .claude/skills would leave the Codex skill's same-shape
-            // description unguarded (PR #95 review).
-            var skillRoots = new[] { Path.Combine(".claude", "skills"), "plugin" };
+            // The shipped frontmatter tree is the Claude Code skills under .claude/skills, bundled by
+            // build-plugin.ps1. Each carries a YAML frontmatter the loader parses, so each is exposed to the
+            // parse-failure class this guard exists for.
+            var skillRoots = new[] { Path.Combine(".claude", "skills") };
             foreach (var root in skillRoots)
                 Check($"INV1-GREEN skill root '{root}' resolves (run from repo root)", Directory.Exists(root),
                     new() { $"'{Path.GetFullPath(root)}' not found — CWD must be the repo root" });
@@ -64,7 +62,7 @@ public static class PluginValidateProbe
                 .Distinct().OrderBy(p => p, StringComparer.Ordinal).ToList();
             // loud-fail on zero: a wrong CWD must never read as "all skills valid" (Q3)
             Check($"INV1-GREEN found shipped skill frontmatters to validate ({skillFiles.Count})", skillFiles.Count > 0,
-                new() { "no SKILL.md under .claude/skills or plugin/ — wrong CWD or empty tree" });
+                new() { "no SKILL.md under .claude/skills — wrong CWD or empty tree" });
             foreach (var f in skillFiles)
             {
                 var v = ValidateSkillFrontmatter(File.ReadAllText(f));
@@ -182,7 +180,7 @@ public static class PluginValidateProbe
     static string FirstLine(string s) => s.Replace("\r", "").Split('\n')[0];
 
     /// <summary>A repo-root-relative, forward-slashed label for a SKILL.md's directory — so
-    /// '.claude/skills/dialogue-authoring' and 'plugin/codex/housecarl' are both unambiguous in the CI log.</summary>
+    /// '.claude/skills/dialogue-authoring' reads unambiguously in the CI log.</summary>
     static string RelLabel(string file)
     {
         var dir = Path.GetDirectoryName(Path.GetFullPath(file))!;

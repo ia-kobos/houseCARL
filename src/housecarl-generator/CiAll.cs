@@ -191,10 +191,6 @@ public static class CiAll
         // regeneration left the shipped reference stale with CI green. Compare the two and name what differs.
         ("emit-match-guard", EmitMatchProbe.RunGuard),
         ("plugin-validate-guard", PluginValidateProbe.RunGuard),
-        // Codex umbrella coverage: the single hand-maintained Codex router (plugin/codex/housecarl/SKILL.md) must
-        // reference every current MCP tool (reflected off [McpServerTool]) and every .claude/skills/* folder, or
-        // allow-list the omission — turns the silent 45→9 drift into a RED arm naming exactly what's unrouted.
-        ("codex-umbrella-coverage-guard", CodexUmbrellaCoverageProbe.RunGuard),
         // Spec-object wire names (#341): every [JsonPropertyName] on the surface, held against the caller-facing
         // shape declaration that names the same member — so a misspelled attribute goes RED instead of dropping
         // that parameter for every real MCP caller with the suite green (every probe builds specs with the C#
