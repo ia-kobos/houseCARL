@@ -18,8 +18,6 @@ namespace HousecarlGenerator;
 ///   * CorpusRulebook.CorpusPath (the one mutable static) is reset to the runner's canonical corpus BEFORE each
 ///     probe, so the 7 "check-first" probes (vmad-poly, poly-field-descend, sameshape, nullarm, formlink-null,
 ///     gendered-nav, floi-fields) reuse it and never validate against a prior probe's deleted temp corpus.
-///   * setup-update-lock-guard nulls the CODEX_HOME env var and never restores it — snapshot + restore around
-///     every probe.
 ///   * Each probe runs inside its own try/catch: a probe that THROWS (rather than returning non-zero) fails only
 ///     itself. (Many probes wrap their body only in try/finally cleanup, not try/catch-return.)
 /// Everything else is already per-probe-scoped: Guid-unique temp dirs (deleted in each probe's finally) and
@@ -494,14 +492,12 @@ public static class CiAll
             Console.WriteLine($"  (shared-corpus pre-gen failed: {ex.Message} — probes will self-generate)");
         }
 
-        var codexHome = Environment.GetEnvironmentVariable("CODEX_HOME");   // snapshot once (setup-update-lock nulls it)
         var results = new List<(string Name, bool Ok, string? Error, double Secs)>();
 
         foreach (var (name, run) in Probes)
         {
             // Reset the shared mutable state before each probe (the §5 co-hosting harness).
             if (canonicalCorpus != null) CorpusRulebook.CorpusPath = canonicalCorpus;
-            Environment.SetEnvironmentVariable("CODEX_HOME", codexHome);
 
             Console.WriteLine();
             Console.WriteLine($"──── [{results.Count + 1}/{Probes.Length}] {name} ────");
@@ -525,7 +521,6 @@ public static class CiAll
                 Console.WriteLine($"::error::CI probe '{name}' FAILED (exit {code}){(error != null ? " — " + error : "")}");
         }
 
-        Environment.SetEnvironmentVariable("CODEX_HOME", codexHome);        // final restore
         try { Directory.Delete(corpusDir, recursive: true); } catch { /* best-effort temp cleanup */ }
 
         // ---- summary ----

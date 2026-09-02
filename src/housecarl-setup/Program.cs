@@ -7,25 +7,12 @@ namespace HousecarlSetup;
 /// <summary>
 /// houseCARL desktop setup - a no-CLI, no-GUI double-click installer.
 ///
-/// houseCARL can be hosted by TWO agents; this utility installs for either or both, behind a
-/// pick-a-number prompt (or a --claude / --codex / --both flag for an unattended run):
-///
-///   [1] Claude Code - copies the bundled plugin into ~/.claude/skills/housecarl/ (the desktop app
-///                     auto-loads its skills) and registers the MCP server in ~/.claude.json (the
-///                     desktop spawns it per session). UNCHANGED from the proven desktop install.
-///   [2] Codex       - installs the server under %LOCALAPPDATA%\houseCARL\server\, copies the helper
-///                     skills + the houseCARL umbrella skill FLAT into ~/.agents/skills/ (the location
-///                     a fresh Codex install was confirmed to scan), and registers the server as
-///                     [mcp_servers.housecarl] in ~/.codex/config.toml.
-///   [3] Both        - both of the above.
+/// Copies the bundled plugin into ~/.claude/skills/housecarl/ (the desktop app auto-loads its
+/// skills) and registers the MCP server in ~/.claude.json (the desktop spawns it per session).
+/// There is no host to choose: this build targets Claude Code only, so setup just installs.
 ///
 /// The MO2 folder is intentionally NOT set here; houseCARL asks for it in chat on first use and stores
-/// it in user.json beside whichever server copy is running.
-///
-/// Codex layout note: Codex scans ~/.agents/skills/ for skill FOLDERS, so the skills go there flat (not
-/// nested inside a plugin folder), and the server - which is not a skill - lives in its own neutral dir.
-/// For a Both install each host runs its own server copy (so MO2 is set once per host); unifying to a
-/// single shared server is a deferred clean-up that would re-touch the proven Claude path.
+/// it in user.json beside the installed server.
 /// </summary>
 public static class Program
 {
@@ -37,14 +24,12 @@ public static class Program
     // does not satisfy a net9.0 framework-dependent server.
     private const string ServerRuntimeMajor = "9";
 
-    public enum Target { Claude, Codex, Both }
-
     /// <summary>What a non-interactive <see cref="TryInstall"/> did.</summary>
     public enum InstallOutcome
     {
-        /// <summary>Skills + server copied and the MCP server registered for the chosen host(s).</summary>
+        /// <summary>Skills + server copied and the MCP server registered.</summary>
         Installed,
-        /// <summary>A houseCARL server file at a destination is in use (a live Claude/Codex session is
+        /// <summary>A houseCARL server file at a destination is in use (a live Claude Code session is
         /// running it), so it could not be overwritten. Nothing usable was changed when the refusal was at
         /// pre-flight (<see cref="InstallResult.RefusedBeforeAnyCopy"/>).</summary>
         ServerInUse,
@@ -64,13 +49,9 @@ public static class Program
     {
         if (args.Contains("--help") || args.Contains("-h"))
         {
-            Console.WriteLine("houseCARL setup - installs houseCARL into Claude Code and/or Codex.");
+            Console.WriteLine("houseCARL setup - installs houseCARL into Claude Code.");
             Console.WriteLine();
-            Console.WriteLine("  Just run it (double-click) and pick which host(s) to install for.");
-            Console.WriteLine("  Or pass a flag to skip the prompt:");
-            Console.WriteLine("    --claude   install for Claude Code only");
-            Console.WriteLine("    --codex    install for Codex only");
-            Console.WriteLine("    --both     install for both");
+            Console.WriteLine("  Just run it (double-click); there is nothing to choose.");
             Console.WriteLine("    --skip-runtime-check   skip the .NET runtime preflight (custom DOTNET_ROOT etc.)");
             return 0;
         }
@@ -138,15 +119,8 @@ public static class Program
                 ? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
                 : homeOverride;
 
-            Target? target = ResolveTarget(args);
-            if (target is null)
-            {
-                Console.WriteLine("Cancelled - nothing was installed.");
-                return Finish(0);
-            }
-
             Console.WriteLine();
-            InstallResult result = TryInstall(target.Value, pluginSrc, home, homeOverride);
+            InstallResult result = TryInstall(pluginSrc, home);
             if (result.Outcome == InstallOutcome.ServerInUse)
             {
                 Console.Error.WriteLine("ERROR: houseCARL is already installed and a server file is in use, so it");
@@ -154,7 +128,7 @@ public static class Program
                 if (result.Message is not null)
                     Console.Error.WriteLine("  " + result.Message);
                 Console.Error.WriteLine();
-                Console.Error.WriteLine("  Fully quit Claude Code AND Codex -- every desktop window, every terminal");
+                Console.Error.WriteLine("  Fully quit Claude Code -- every desktop window, every terminal");
                 Console.Error.WriteLine("  session, and any background session -- then run this setup again.");
                 Console.Error.WriteLine(result.RefusedBeforeAnyCopy
                     ? "  Nothing was changed."
@@ -162,7 +136,7 @@ public static class Program
                 return Finish(1);
             }
 
-            PrintNext(target.Value);
+            PrintNext();
             return Finish(0);
         }
         catch (Exception ex)
@@ -178,37 +152,32 @@ public static class Program
 
     /// <summary>
     /// Copy the plugin + register the MCP server for the chosen host(s), non-interactively. This is the seam
-    /// <see cref="Main"/> drives after the prompt, and the one the CI guard drives directly.
+    /// <see cref="Main"/> drives, and the one the CI guard drives directly.
     ///
     /// Re-running setup over a LIVE install would have <see cref="CopyDirectory"/> overwrite the running
     /// <c>housecarl-mcp.exe</c> (File.Copy overwrite:true), throw mid-copy, and leave a half-updated tree
-    /// behind a generic "did not complete". So we PRE-FLIGHT the lock at EVERY destination this target
-    /// touches, before copying anything, and refuse with actionable guidance (mirrors the runtime preflight
+    /// behind a generic "did not complete". So we PRE-FLIGHT the lock at the destination, before copying
+    /// anything, and refuse with actionable guidance (mirrors the runtime preflight
     /// below). A clean first install (no destination exe yet) is never blocked. As defense in depth, a
     /// sharing violation that slips past the pre-flight (a held sibling DLL, or a session started between the
     /// check and the copy) is caught and surfaced with the same guidance instead of the generic failure.
     /// </summary>
-    public static InstallResult TryInstall(Target target, string pluginSrc, string home, string? homeOverride)
+    public static InstallResult TryInstall(string pluginSrc, string home)
     {
-        List<string> destExes = new();
-        if (target is Target.Claude or Target.Both) destExes.Add(ClaudeDestExe(home));
-        if (target is Target.Codex  or Target.Both) destExes.Add(CodexDestExe(home, homeOverride));
-
-        foreach (string destExe in destExes)
-            if (ServerExeInUse(destExe))
-                return new InstallResult(InstallOutcome.ServerInUse,
-                        "Can't update the server here — it looks like it's running (or the file is locked/read-only): " + destExe)
-                    { RefusedBeforeAnyCopy = true };
+        string destExe = ClaudeDestExe(home);
+        if (ServerExeInUse(destExe))
+            return new InstallResult(InstallOutcome.ServerInUse,
+                    "Can't update the server here — it looks like it's running (or the file is locked/read-only): " + destExe)
+                { RefusedBeforeAnyCopy = true };
 
         try
         {
-            if (target is Target.Claude or Target.Both) InstallForClaude(pluginSrc, home);
-            if (target is Target.Codex  or Target.Both) InstallForCodex(pluginSrc, home, homeOverride);
+            InstallForClaude(pluginSrc, home);
         }
         catch (IOException ex) when (IsSharingViolation(ex))
         {
-            // The try wraps the copy AND the host-config registration, so the locked file may be the server
-            // exe/DLL or a config file (e.g. ~/.codex/config.toml open in an editor) — name both honestly.
+            // The try wraps the copy AND the ~/.claude.json registration, so the locked file may be the
+            // server exe/DLL or the config file it writes — name both honestly.
             return new InstallResult(InstallOutcome.ServerInUse,
                 "A houseCARL file was in use during the update (the server, or a config file it writes).");
         }
@@ -220,23 +189,9 @@ public static class Program
     private static string ClaudeDestExe(string home)
         => Path.Combine(home, ".claude", "skills", PluginFolderName, "server", "housecarl-mcp.exe");
 
-    /// <summary>The Codex install's server dir. Under a test home (HOUSECARL_SETUP_HOME) it hangs off that
-    /// home so tests never touch the real LOCALAPPDATA; otherwise it lives under %LOCALAPPDATA%.</summary>
-    private static string CodexServerDir(string home, string? homeOverride)
-    {
-        string dataBase = string.IsNullOrWhiteSpace(homeOverride)
-            ? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-            : home;
-        return Path.Combine(dataBase, "houseCARL", "server");
-    }
-
-    /// <summary>The Codex install's server exe path. Single source of truth so pre-flight == installer.</summary>
-    private static string CodexDestExe(string home, string? homeOverride)
-        => Path.Combine(CodexServerDir(home, homeOverride), "housecarl-mcp.exe");
-
     /// <summary>
     /// True if <paramref name="destExe"/> already exists AND can't be opened for writing — i.e. a live
-    /// Claude/Codex session is running it (a running image denies write sharing). A missing file (a clean
+    /// Claude Code session is running it (a running image denies write sharing). A missing file (a clean
     /// first install) returns false, so it's never falsely blocked. The handle is opened then immediately
     /// closed and never written, so a held server's exe stays byte-intact.
     ///
@@ -333,35 +288,6 @@ public static class Program
         return required.Where(fx => !found.Contains(fx)).ToList();
     }
 
-    // ---- target selection (flag or interactive prompt) --------------------
-
-    private static Target? ResolveTarget(string[] args)
-    {
-        if (args.Contains("--both"))   return Target.Both;
-        if (args.Contains("--codex"))  return Target.Codex;
-        if (args.Contains("--claude")) return Target.Claude;
-
-        Console.WriteLine("Install houseCARL for which agent?");
-        Console.WriteLine("  [1] Claude Code");
-        Console.WriteLine("  [2] Codex");
-        Console.WriteLine("  [3] Both");
-        Console.WriteLine();
-        while (true)
-        {
-            Console.Write("Enter 1, 2, or 3 (or q to quit): ");
-            string? s = Console.ReadLine();
-            if (s is null) return null;        // no interactive input (redirected) - treat as cancel
-            switch (s.Trim().ToLowerInvariant())
-            {
-                case "1": return Target.Claude;
-                case "2": return Target.Codex;
-                case "3": return Target.Both;
-                case "q": case "quit": return null;
-                default: Console.WriteLine("  Please type 1, 2, 3, or q."); break;
-            }
-        }
-    }
-
     // ---- Claude Code install (unchanged from the proven desktop install) ---
 
     private static void InstallForClaude(string pluginSrc, string home)
@@ -380,72 +306,16 @@ public static class Program
         Console.WriteLine();
     }
 
-    // ---- Codex install -----------------------------------------------------
-
-    private static void InstallForCodex(string pluginSrc, string home, string? homeOverride)
-    {
-        // Server + corpus go to a neutral per-user dir, NOT the skills dir: Codex scans ~/.agents/skills
-        // for skill FOLDERS, and the server is not a skill. Under a test home (HOUSECARL_SETUP_HOME) the
-        // data dir hangs off that home so tests never touch the real LOCALAPPDATA.
-        string serverDest = CodexServerDir(home, homeOverride);
-        string destExe    = CodexDestExe(home, homeOverride);
-
-        // Skills go FLAT under ~/.agents/skills/ (the cross-agent, user-scope skills dir).
-        string skillsRoot = Path.Combine(home, ".agents", "skills");
-
-        // ~/.codex/config.toml, honoring CODEX_HOME if the user set it.
-        string? codexHomeEnv = Environment.GetEnvironmentVariable("CODEX_HOME");
-        string codexHome = string.IsNullOrWhiteSpace(codexHomeEnv)
-            ? Path.Combine(home, ".codex")
-            : codexHomeEnv;
-        string configToml = Path.Combine(codexHome, "config.toml");
-
-        Console.WriteLine("[Codex] installing the server");
-        Console.WriteLine("      -> " + serverDest);
-        CopyDirectory(Path.Combine(pluginSrc, "server"), serverDest);
-
-        Console.WriteLine("[Codex] installing skills");
-        Console.WriteLine("      -> " + skillsRoot);
-        string skillsSrc = Path.Combine(pluginSrc, "skills");
-        if (Directory.Exists(skillsSrc))
-            foreach (string skillDir in Directory.GetDirectories(skillsSrc))
-                CopyDirectory(skillDir, Path.Combine(skillsRoot, Path.GetFileName(skillDir)));
-
-        // Codex-only umbrella skill: the $housecarl entry point (a top-level SKILL.md routing to the
-        // helpers + an agents/openai.yaml declaring the MCP-server dependency). It ships beside the plugin
-        // in the package (codex/housecarl), NOT inside it, so the Claude install never sees it. Placed in
-        // ~/.agents/skills/ alongside the helpers - the location a fresh Codex install was confirmed to
-        // scan (the helpers there are discovered and working).
-        string umbrellaSrc = Path.Combine(Path.GetDirectoryName(pluginSrc)!, "codex", "housecarl");
-        if (Directory.Exists(umbrellaSrc))
-        {
-            string umbrellaDest = Path.Combine(skillsRoot, PluginFolderName);
-            Console.WriteLine("[Codex] installing the houseCARL umbrella skill");
-            Console.WriteLine("      -> " + umbrellaDest);
-            CopyDirectory(umbrellaSrc, umbrellaDest);
-        }
-
-        Console.WriteLine("[Codex] registering the MCP server");
-        Console.WriteLine("      -> " + configToml);
-        RegisterCodexMcpServer(configToml, McpServerName, destExe);
-        Console.WriteLine();
-    }
-
     // ---- NEXT steps --------------------------------------------------------
 
-    private static void PrintNext(Target target)
+    private static void PrintNext()
     {
         Console.WriteLine("houseCARL is installed.");
         Console.WriteLine();
         Console.WriteLine("  NEXT:");
-        if (target is Target.Claude or Target.Both)
-            Console.WriteLine("   - Claude Code: fully quit and reopen the Claude desktop app.");
-        if (target is Target.Codex or Target.Both)
-            Console.WriteLine("   - Codex: fully restart Codex (close every session), then check /mcp and /skills.");
+        Console.WriteLine("   - Fully quit and reopen the Claude desktop app.");
         Console.WriteLine("   - On first use of a houseCARL tool it will ask you to point it at your");
         Console.WriteLine("     Mod Organizer 2 folder (the one containing ModOrganizer.ini).");
-        if (target is Target.Both)
-            Console.WriteLine("   - (Each host runs its own server copy, so you'll set the MO2 folder once per host.)");
     }
 
     private static int Finish(int exitCode)
@@ -594,79 +464,5 @@ public static class Program
         string[] lines = json.Split('\n');
         for (int i = 1; i < lines.Length; i++) lines[i] = indent + lines[i];
         return string.Join('\n', lines);
-    }
-
-    // ---- ~/.codex/config.toml registration (TOML splice) ------------------
-
-    /// <summary>
-    /// Insert/replace [mcp_servers.<paramref name="name"/>] in a TOML config.toml, leaving everything
-    /// else intact. The command path is written as a LITERAL TOML string (single quotes) so Windows
-    /// backslashes pass through verbatim - a basic "double-quoted" string would treat them as escapes.
-    /// Backs the file up first; idempotent on re-run.
-    /// </summary>
-    private static void RegisterCodexMcpServer(string configTomlPath, string name, string command)
-    {
-        string? dir = Path.GetDirectoryName(configTomlPath);
-        if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-
-        if (!File.Exists(configTomlPath))
-        {
-            string fresh = "# houseCARL MCP server (added by houseCARL-Setup)\n"
-                         + "[mcp_servers." + name + "]\n"
-                         + "command = '" + command + "'\n";
-            File.WriteAllText(configTomlPath, fresh);
-            return;
-        }
-
-        string text = File.ReadAllText(configTomlPath);
-        File.Copy(configTomlPath, configTomlPath + ".houseCARL.bak", overwrite: true);
-        File.WriteAllText(configTomlPath, SpliceTomlTable(text, name, command));
-    }
-
-    /// <summary>
-    /// Replace the [mcp_servers.&lt;name&gt;] table (and any of its subtables) with a fresh one, or append
-    /// it if absent. Line-based so it never reformats the rest of the file; preserves the file's newline
-    /// style. A TOML table body runs from its header to the next table header (or EOF).
-    /// </summary>
-    private static string SpliceTomlTable(string text, string name, string command)
-    {
-        string nl   = text.Contains("\r\n") ? "\r\n" : "\n";
-        string head = "[mcp_servers." + name + "]";
-        string sub  = "[mcp_servers." + name + ".";
-        string[] body = { head, "command = '" + command + "'" };
-
-        string[] lines = text.Replace("\r\n", "\n").Split('\n');
-        List<string> outLines = new();
-        bool replaced = false;
-        for (int i = 0; i < lines.Length; i++)
-        {
-            if (!replaced && lines[i].Trim() == head)
-            {
-                // skip our existing table body + any [mcp_servers.<name>.*] subtables
-                int j = i + 1;
-                while (j < lines.Length)
-                {
-                    string t = lines[j].Trim();
-                    if (t.StartsWith("[") && t != head && !t.StartsWith(sub)) break;
-                    j++;
-                }
-                outLines.AddRange(body);
-                i = j - 1;          // resume after the skipped block
-                replaced = true;
-                continue;
-            }
-            outLines.Add(lines[i]);
-        }
-
-        if (!replaced)
-        {
-            string trimmed = string.Join(nl, outLines).TrimEnd('\r', '\n');
-            return trimmed.Length == 0
-                ? "# houseCARL MCP server (added by houseCARL-Setup)" + nl + string.Join(nl, body) + nl
-                : trimmed + nl + nl + string.Join(nl, body) + nl;
-        }
-
-        string result = string.Join(nl, outLines);
-        return result.EndsWith(nl) ? result : result + nl;
     }
 }
